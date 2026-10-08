@@ -130,8 +130,8 @@ export default function SearchCourse() {
                     <p className="text-xs mt-1 line-clamp-2" style={{ color: '#64748b', lineHeight: '1.6' }}>{course.description}</p>
                     <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: '#475569' }}>
                       <span>👤 {course.faculty}</span>
-                      <span>📦 {course.units.length} units</span>
-                      <span>👥 {course.enrolledStudents.length} enrolled</span>
+                      {/* <span>📦 {course.units.length} units</span>
+                      <span>👥 {course.enrolledStudents.length} enrolled</span> */}
                     </div>
                   </div>
                   <div className="flex-shrink-0">
