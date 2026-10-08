@@ -1,5 +1,5 @@
 import type { ICourse, IStudent } from './types'
-import {CourseSchema} from './courseModel.ts'
+
 
 export const initialCourses: ICourse[] = [
   {
@@ -235,15 +235,6 @@ export const initialCourses: ICourse[] = [
     createdAt: '2024-01-30'
   }
 ]
-
-export const seedDatabase = async (course: Partial<ICourse> = {}) => {
-  try {
-    const result = await CourseSchema.insertMany(initialCourses); // change insertMany to insertOne if you want to insert a single course
-    console.log(`Successfully inserted ${course.title} into the database!`);
-  } catch (error) {
-    console.error('Error seeding data:', error);
-  }
-};
 
 export const initialStudents: IStudent[] = [
   {

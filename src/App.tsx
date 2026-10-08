@@ -21,6 +21,7 @@ import GlobalCourses from './screens/student/GlobalCourses'
 import SearchCourse from './screens/student/SearchCourse'
 import StudentMyLearning from './screens/student/StudentMyLearning'
 
+
 const AUTH_SCREENS = new Set(['landing', 'login', 'register'])
 
 function AppShell() {
@@ -99,7 +100,9 @@ function AppShell() {
   )
 }
 
+
 export default function App() {
+  console.log('App rendered') 
   return (
     <AppProvider>
       <AppShell />
