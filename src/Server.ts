@@ -1,11 +1,14 @@
 import express from 'express';
+import cors from 'cors';
 import { connectDB } from './DBConnection.ts';
 import { CourseSchema } from './courseModel.ts';
-import { initialCourses } from './data.ts'
-import type { ICourse } from './types.ts'
+import type { ICourse } from './types.ts';
+import { initialCourses } from './data.ts';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cors()); 
 
 connectDB();
 
@@ -16,8 +19,8 @@ export const seedDatabase = async (course: Partial<ICourse> = {}) => {
   } catch (error) {
     console.error('Error seeding data:', error);
   }
-};
 
+};
 
 app.use(express.json());
 
@@ -41,7 +44,7 @@ app.get("/api/seed", async (req, res) => {
   }
 });
 
-app.get('/api/courses', async (req, res) => {
+app.get('/api/FetchCourses', async (req, res) => {
   try {
 
     const courses = await CourseSchema.find();

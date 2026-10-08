@@ -48,6 +48,8 @@ export interface ICourse {
   createdAt: string
 }
 
+
+
 export interface IEnrolledCourse {
   courseId: string
   progress: number

@@ -36,7 +36,7 @@ export default function GlobalCourses() {
     'Cybersecurity': '#ef4444',
     'Mathematics': '#8b5cf6',
   }
-
+  console.log('Available courses:', available)
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
@@ -81,13 +81,13 @@ export default function GlobalCourses() {
 
                 <div className="flex items-center justify-between text-xs" style={{ color: '#475569' }}>
                   <span>👤 {course.faculty}</span>
-                  <span>👥 {course.enrolledStudents.length} enrolled</span>
+                  {/* <span>👥 {course.enrolledStudents.length} enrolled</span> */}
                 </div>
 
                 <div className="flex items-center gap-3 text-xs" style={{ color: '#334155' }}>
-                  <span>📦 {course.units.length} units</span>
+                  {/* <span>📦 {course.units.length} units</span>
                   <span>📝 {course.syllabus.length} topics</span>
-                  <span>🔬 {course.experiments.length} labs</span>
+                  <span>🔬 {course.experiments.length} labs</span> */}
                 </div>
 
                 {isEnrolled ? (
