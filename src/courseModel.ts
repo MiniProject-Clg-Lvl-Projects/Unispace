@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import {type IContentItem,type IUnit,type ICourse} from './types.ts'
+import type { IContentItem,IUnit,ICourse} from './types.ts'
 
 const contentSchema = new Schema<IContentItem>({
   id: { type: String, required: true },

@@ -1,11 +1,23 @@
 import express from 'express';
 import { connectDB } from './DBConnection.ts';
 import { CourseSchema } from './courseModel.ts';
-import {seedDatabase} from './data.ts'  
+import { initialCourses } from './data.ts'
+import type { ICourse } from './types.ts'
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 connectDB();
+
+export const seedDatabase = async (course: Partial<ICourse> = {}) => {
+  try {
+    const result = await CourseSchema.insertMany(initialCourses); // change insertMany to insertOne if you want to insert a single course
+    console.log(`Successfully inserted ${course.title} into the database!`);
+  } catch (error) {
+    console.error('Error seeding data:', error);
+  }
+};
+
 
 app.use(express.json());
 
@@ -15,7 +27,6 @@ app.get('/', (req, res) => {
 
 app.get("/api/seed", async (req, res) => {
   try {
-
 
     const totalInserted = await seedDatabase(); // Assuming ICourse is the course you want to seed
     
