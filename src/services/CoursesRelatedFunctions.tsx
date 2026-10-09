@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import type { ICourse } from '../types'
-import { getCourses } from '../services/courseService.tsx'
+import type { ICourse } from '../types.ts'
+import { getCourses } from './courseService.tsx'
 
 export function CourseList() {
   const [courses, setCourses] = useState<ICourse[]>([])

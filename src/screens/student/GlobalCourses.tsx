@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../../context'
 import { Btn, Badge, StatusBadge } from '../../components/ui'
 
-const STUDENT_ID = 'st1'
+const STUDENT_ID = 'st1' //Remove this and use the logged-in student from context when authentication is implemented
 
 export default function GlobalCourses() {
   const { courses, students, setCourses, setStudents, navigate, showToast } = useApp()
@@ -81,13 +81,13 @@ export default function GlobalCourses() {
 
                 <div className="flex items-center justify-between text-xs" style={{ color: '#475569' }}>
                   <span>👤 {course.faculty}</span>
-                  {/* <span>👥 {course.enrolledStudents.length} enrolled</span> */}
+                  <span>👥 {course.enrolledStudents.length} enrolled</span>
                 </div>
 
                 <div className="flex items-center gap-3 text-xs" style={{ color: '#334155' }}>
-                  {/* <span>📦 {course.units.length} units</span>
+                <span>📦 {course.units.length} units</span>
                   <span>📝 {course.syllabus.length} topics</span>
-                  <span>🔬 {course.experiments.length} labs</span> */}
+                  <span>🔬 {course.experiments.length} labs</span>
                 </div>
 
                 {isEnrolled ? (

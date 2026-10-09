@@ -97,6 +97,7 @@ export type Screen =
   | 'student-search'
   | 'student-my-learning'
   | 'student-total-courses'
+  | 'student-course-detail'
   | 'student-completed-courses'
   | 'student-inprogress-courses'
   | 'student-notstarted-courses'
