@@ -33,7 +33,7 @@ export default function SearchCourse() {
     setEnrolling(courseId)
     const now = new Date().toISOString().split('T')[0]
     setTimeout(() => {
-      setCourses(prev => prev.map(c => c.id === courseId ? { ...c, enrolledStudents: [...c.enrolledStudents, STUDENT_ID] } : c))
+      // setCourses(prev => prev.map(c => c.id === courseId ? { ...c, enrolledStudents: [...c.enrolledStudents, STUDENT_ID] } : c))
       setStudents(prev => prev.map(s =>
         s.id === STUDENT_ID
           ? { ...s, enrolledCourses: [...s.enrolledCourses, { courseId, progress: 0, status: 'not-started', currentUnit: '', enrolledAt: now }] }
@@ -131,7 +131,7 @@ export default function SearchCourse() {
                     <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: '#475569' }}>
                       <span>👤 {course.faculty}</span>
                      <span>📦 {course.units.length} units</span>
-                      <span>👥 {course.enrolledStudents.length} enrolled</span> 
+                      {/* <span>👥 {course.enrolledStudents.length} enrolled</span>  */}
                     </div>
                   </div>
                   <div className="flex-shrink-0">

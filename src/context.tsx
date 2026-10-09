@@ -1,7 +1,7 @@
 import { createContext, useContext, useState,useEffect, useCallback, type ReactNode } from 'react'
 import type { ICourse, IStudent, IUser, Screen, IContentItem } from './types.ts'
 import { initialStudents } from './data.ts'
-import { getCourses } from './services/courseService.tsx' 
+import { getCourses,createCourse } from './services/courseService.tsx' 
 
 interface NavData {
   course?: ICourse
@@ -52,14 +52,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getCourses()
       .then((data) => {
         setCourses(data)
-        console.log('Courses loaded in AppContext:', data)
       })
       .catch((err) => console.error('Failed to load courses in AppContext:', err))
       .finally(() => setLoading(false))
   }, []) // empty dependency array ensures this runs only once on mount
 
   const navigate = useCallback((screen: Screen, data?: NavData) => {
-    console.log('Received navigation data:', data)
     setHistory(prev => [...prev, currentScreen])
     setCurrentScreen(screen)
     if (data?.course !== undefined) setSelectedCourse(data.course)

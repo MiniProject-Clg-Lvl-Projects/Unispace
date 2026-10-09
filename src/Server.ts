@@ -3,7 +3,6 @@ import cors from 'cors';
 import { connectDB } from './DBConnection.ts';
 import { CourseSchema } from './courseModel.ts';
 import type { ICourse } from './types.ts';
-// import { initialCourses } from './data.ts';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,10 +28,13 @@ app.get('/', (req, res) => {
 });
 
 // Required for Faculty to seed the database with initial courses.
-app.get("/api/seed", async (req, res) => {
+app.post("/api/AddCourses", async (req, res) => {
   try {
+    const course = req.body as Partial<ICourse>;
+    console.log('Course ID:', course.id)
+    console.log('Full request body:', req.body)
     // TODO Need to pass a course object to seedDatabase function. 
-    const totalInserted = await seedDatabase(); // Assuming ICourse is the course you want to seed
+    const totalInserted = await seedDatabase(course); // Assuming ICourse is the course you want to seed
     
     res.status(201).json({ 
       success: true,

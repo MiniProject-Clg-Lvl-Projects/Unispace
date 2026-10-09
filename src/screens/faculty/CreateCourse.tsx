@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../../context'
 import { Btn, Input, Textarea, Select } from '../../components/ui'
 import type { ICourse } from '../../types'
+import { createCourse } from '../../services/courseService.tsx'
 
 export default function CreateCourse() {
   const { courses, setCourses, navigate, showToast } = useApp()
@@ -35,12 +36,16 @@ export default function CreateCourse() {
       enrolledStudents: [],
       createdAt: new Date().toISOString().split('T')[0],
     }
+    createCourse(newCourse).catch(err => console.error(`Failed to create course ${newCourse.title}:`, err))
+
     setCourses(prev => [...prev, newCourse])
     showToast(`"${form.title}" created successfully!`)
     navigate('faculty-course-info', { course: newCourse })
   }
 
+  //FORM for creating the Course
   return (
+
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>Create New Course</h1>
