@@ -93,7 +93,7 @@ export default function CourseContent() {
                       unit.content.map(item => (
                         <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors"
                           style={{ background: '#0a0f1a' }}
-                          onClick={() => navigate('faculty-document-preview', { content: item, course })}>
+                          onClick={() => navigate('faculty-document-preview', { content: course.units.find(e => e.title === unit.title)?.content, course })}>
                           <span className="text-sm">{item.type === 'pdf' ? '📄' : item.type === 'video' ? '🎥' : '❓'}</span>
                           <span className="text-sm text-white">{item.title}</span>
                           <span className="ml-auto text-xs" style={{ color: '#475569' }}>{item.type}</span>
