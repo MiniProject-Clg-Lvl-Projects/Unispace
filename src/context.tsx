@@ -1,11 +1,11 @@
 import { createContext, useContext, useState,useEffect, useCallback, type ReactNode } from 'react'
 import type { ICourse, IStudent, IUser, Screen, IContentItem } from './types.ts'
-import { initialCourses, initialStudents } from './data.ts'
+import { initialStudents } from './data.ts'
 import { getCourses } from './services/courseService.tsx' 
 
 interface NavData {
   course?: ICourse
-  content?: IContentItem
+  content?: IContentItem[]
   filter?: string
 }
 
@@ -15,7 +15,7 @@ interface AppState {
   courses: ICourse[]
   students: IStudent[]
   selectedCourse: ICourse | null
-  selectedContent: IContentItem | null
+  selectedContent: IContentItem[] | undefined
   screenFilter: string
   navigate: (screen: Screen, data?: NavData) => void
   goBack: () => void
@@ -40,7 +40,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState<boolean>(true)
   const [students, setStudents] = useState<IStudent[]>(initialStudents)
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null)
-  const [selectedContent, setSelectedContent] = useState<IContentItem | null>(null)
+  const [selectedContent, setSelectedContent] = useState<IContentItem[] | undefined>(undefined)
   const [screenFilter, setScreenFilter] = useState<string>('')
   const [history, setHistory] = useState<Screen[]>([])
   const [toast, setToast] = useState<string | null>(null)
@@ -59,6 +59,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []) // empty dependency array ensures this runs only once on mount
 
   const navigate = useCallback((screen: Screen, data?: NavData) => {
+    console.log('Received navigation data:', data)
     setHistory(prev => [...prev, currentScreen])
     setCurrentScreen(screen)
     if (data?.course !== undefined) setSelectedCourse(data.course)

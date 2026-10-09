@@ -24,7 +24,6 @@ const courseSchema = new Schema<ICourse>({
   category: { type: String, required: true },
   level: { type: String, required: true },
   status: { type: String, required: true },
-  approvalStatus: { type: String, required: true },
   units: [unitSchema]
 });
 

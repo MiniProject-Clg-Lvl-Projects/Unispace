@@ -20,12 +20,20 @@ import StudentDashboard from './screens/student/StudentDashboard'
 import GlobalCourses from './screens/student/GlobalCourses'
 import SearchCourse from './screens/student/SearchCourse'
 import StudentMyLearning from './screens/student/StudentMyLearning'
-
+import StudentCourseDetail from './screens/student/StudentCourseDetail'
+import { useState } from 'react'
+import { IContentItem, ICourse } from './types'
 
 const AUTH_SCREENS = new Set(['landing', 'login', 'register'])
 
 function AppShell() {
-  const { currentScreen, toast, toastType } = useApp()
+const {
+  currentScreen,
+  toast,
+  toastType,
+  selectedCourse,
+  selectedContent
+} = useApp()
 
   const isAuth = AUTH_SCREENS.has(currentScreen)
 
@@ -55,6 +63,10 @@ function AppShell() {
       case 'student-completed-courses': return <StudentMyLearning />
       case 'student-inprogress-courses': return <StudentMyLearning />
       case 'student-notstarted-courses': return <StudentMyLearning />
+      case 'student-course-detail': 
+        console.log('Selected course:', selectedCourse)
+        console.log('Selected content:', selectedContent)
+      return selectedCourse ?  (<StudentCourseDetail course={selectedCourse} content={selectedContent} />) : (<Landing />)
       default: return <Landing />
     }
   }
