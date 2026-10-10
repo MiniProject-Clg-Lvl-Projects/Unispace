@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useApp } from '../context'
 import { Btn, Input } from '../components/ui'
-import type { Role } from '../types'
+import type { ILogin, Role } from '../types'
+import {VerifyStudentData,AddUserData} from '../services/LoginRelatedFunctions.tsx'
 
 type Mode = 'select' | 'login' | 'register'
 
@@ -23,20 +24,28 @@ export default function Login() {
 
   const handleRoleSelect = (r: Role) => {
     setRole(r)
-    const demo = demoAccounts[r]
-    setEmail(demo.email)
-    setPassword(demo.password)
-    setName(demo.name)
     setMode(isRegister ? 'register' : 'login')
+
   }
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) { setError('Please fill in all fields.'); return }
-    login(role, name || demoAccounts[role].name, email)
+    const person =await VerifyStudentData(email, password);
+    
+    login(role, person?.name, person?.email)
   }
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name || !email || !password) { setError('Please fill in all required fields.'); return }
+    
+    const User: Partial<ILogin> = {
+      email: email,
+      passwordHash: password,
+      role: role,
+      isActive: true
+    };
+
+    const person = await AddUserData(User);
     login(role, name, email)
   }
 

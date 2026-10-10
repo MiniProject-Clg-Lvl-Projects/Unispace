@@ -21,8 +21,7 @@ import GlobalCourses from './screens/student/GlobalCourses'
 import SearchCourse from './screens/student/SearchCourse'
 import StudentMyLearning from './screens/student/StudentMyLearning'
 import StudentCourseDetail from './screens/student/StudentCourseDetail'
-import { useState } from 'react'
-import { IContentItem, ICourse } from './types'
+
 
 const AUTH_SCREENS = new Set(['landing', 'login', 'register'])
 

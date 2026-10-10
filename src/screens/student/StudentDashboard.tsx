@@ -1,6 +1,7 @@
 import { useApp } from '../../context'
 import { StatCard, Btn, ProgressBar } from '../../components/ui'
 
+// TODO : Replace with actual student ID from auth context or state
 const STUDENT_ID = 'st1'
 
 
@@ -108,8 +109,7 @@ export default function StudentDashboard() {
               ))}
             </div>
           </div>
-
-          {/* Recommended */}
+          {/* Recommended Courses */}
           <div className="rounded-xl p-5" style={{ background: '#111827', border: '1px solid #1a2540' }}>
             <h3 className="font-semibold text-white mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>Recommended Courses</h3>
             <div className="space-y-3">
