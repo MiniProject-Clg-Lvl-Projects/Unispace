@@ -235,7 +235,7 @@ import type { ICourse, IStudent } from './types'
 //     createdAt: '2024-01-30'
 //   }
 // ]
-
+/*
 export const initialStudents: IStudent[] = [
   {
     id: 'st1',
@@ -314,3 +314,4 @@ export const initialStudents: IStudent[] = [
     enrolledCourses: []
   },
 ]
+*/

@@ -1,5 +1,4 @@
 
-import {seedDatabase} from '../Server.ts'
 import type { ICourse } from '../types.ts'
 
 export const getCourses = async (): Promise<ICourse[]> => {

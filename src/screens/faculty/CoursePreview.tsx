@@ -63,7 +63,7 @@ export default function CoursePreview() {
                         style={{ color: '#94a3b8' }}
                         onMouseEnter={e => { (e.currentTarget.style.background = '#141d2e'); (e.currentTarget.style.color = '#e2e8f0') }}
                         onMouseLeave={e => { (e.currentTarget.style.background = 'transparent'); (e.currentTarget.style.color = '#94a3b8') }}
-                        onClick={() => navigate('faculty-document-preview', { content: item, course })}>
+                        onClick={() => navigate('faculty-document-preview', { content: unit.content, course })}>
                         <span>{item.type === 'pdf' ? '📄' : item.type === 'video' ? '🎥' : '❓'}</span>
                         <span className="text-sm">{item.title}</span>
                         <span className="ml-auto text-xs" style={{ color: '#334155' }}>{item.type}</span>

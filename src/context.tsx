@@ -1,6 +1,6 @@
 import { createContext, useContext, useState,useEffect, useCallback, type ReactNode } from 'react'
 import type { ICourse, IStudent, IUser, Screen, IContentItem } from './types.ts'
-import { initialStudents } from './data.ts'
+
 import { getCourses,createCourse } from './services/courseService.tsx' 
 
 interface NavData {
@@ -38,7 +38,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [currentScreen, setCurrentScreen] = useState<Screen>('landing')
   const [courses, setCourses] = useState<ICourse[]>([])
   const [loading, setLoading] = useState<boolean>(true)
-  const [students, setStudents] = useState<IStudent[]>(initialStudents)
+  const [students, setStudents] = useState<IStudent[]>([])
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null)
   const [selectedContent, setSelectedContent] = useState<IContentItem[] | undefined>(undefined)
   const [screenFilter, setScreenFilter] = useState<string>('')
@@ -76,7 +76,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const login = useCallback((role: 'faculty' | 'student', name: string, email: string) => {
+  const login = useCallback((role: 'faculty' | 'student', name: string, email: string ) => {
     setCurrentUser({ id: role === 'faculty' ? 'f1' : 'st_logged', name, email, role, department: 'Computer Science Engineering' })
     setCurrentScreen(role === 'faculty' ? 'faculty-dashboard' : 'student-dashboard')
     setHistory([])

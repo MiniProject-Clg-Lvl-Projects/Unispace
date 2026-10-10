@@ -24,6 +24,7 @@ export default function CreateCourse() {
       facultyId: 'f1',
       category: form.category,
       level: form.level,
+      Learning: 'not-started',
       status: 'draft',
       approvalStatus: 'pending',
       units: [],

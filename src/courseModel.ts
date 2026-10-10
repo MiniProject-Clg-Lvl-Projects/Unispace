@@ -1,5 +1,28 @@
 import { Schema, model } from 'mongoose';
-import type { IContentItem,IUnit,ICourse} from './types.ts'
+import type { IContentItem,IUnit,ICourse, IStudent, ILogin, IFaculty} from './types.ts'
+
+const userSchema = new Schema<ILogin>(
+  {
+    email: {type: String,required: true,unique: true,lowercase: true,trim: true},
+    passwordHash: {type: String,required: true,select: false},
+    role: {type: String,enum: ['student', 'faculty', 'admin'],required: true},
+    isActive: { type: Boolean,default: true}
+  },{timestamps: true}
+);
+
+const facultySchema = new Schema<IFaculty >({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  facultyId: { type: String, required: true }
+},{_id: false });
+
+const studentSchema = new Schema<IStudent>({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  studentId: { type: String, required: true }
+},{_id: false });
 
 const contentSchema = new Schema<IContentItem>({
   id: { type: String, required: true },
@@ -27,4 +50,7 @@ const courseSchema = new Schema<ICourse>({
   units: [unitSchema]
 });
 
-export const CourseSchema = model<ICourse>('Course', courseSchema);
+export const UserSchema = model<ILogin>('users', userSchema);
+export const StudentSchema = model<IStudent>('students', studentSchema);
+export const FacultySchema = model<IFaculty>('faculties', facultySchema);
+export const CourseSchema = model<ICourse>('courses', courseSchema);
