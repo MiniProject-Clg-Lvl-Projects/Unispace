@@ -3,7 +3,7 @@ import { useApp } from '../../context'
 import { Btn, Badge, StatusBadge } from '../../components/ui'
 import { match } from 'node:assert/strict'
 
-const STUDENT_ID = 'st1'
+const STUDENT_ID = 'st1' // Change this to the logged in id
 
 export default function SearchCourse() {
   const { courses, students, setCourses, setStudents, navigate, showToast } = useApp()

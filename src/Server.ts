@@ -3,6 +3,7 @@ import cors from 'cors';
 import { connectDB } from './DBConnection.ts';
 import { CourseSchema,StudentSchema,FacultySchema, UserSchema} from './courseModel.ts';
 import type { ICourse, IStudent, IFaculty, ILogin } from './types.ts';
+import bcrypt from 'bcrypt';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,9 +24,9 @@ export const seedCoursesDatabase = async (course: Partial<ICourse> = {}) => {
 };
 
 // Use for seeding the database with initial User data.
-export const seedRegisterDatabase = async (user: Partial<ILogin> = {}) => {
+export const seedUserDatabase = async (user: Partial<ILogin> = {}) => {
   try {
-    UserSchema.create(user); // Adds a new user to the database
+    await UserSchema.create(user); // Adds a new user to the database
     console.log(`Successfully inserted ${user.email} into the database!`);
   } catch (error) {
     console.error('Error seeding data:', error);
@@ -38,7 +39,7 @@ export const seedRegisterDatabase = async (user: Partial<ILogin> = {}) => {
 // Use for seeding the database with initial student data.
 export const seedStudentDatabase = async (student: Partial<IStudent> = {}) => {
   try {
-    StudentSchema.create(student); // Adds a new student to the database
+    await StudentSchema.create(student); // Adds a new student to the database
     console.log(`Successfully inserted ${student.name} into the database!`);
   } catch (error) {
     console.error('Error seeding data:', error);
@@ -49,7 +50,7 @@ export const seedStudentDatabase = async (student: Partial<IStudent> = {}) => {
 // Use for seeding the database with initial faculty data.
 export const seedFacultyDatabase = async (faculty: Partial<IFaculty> = {}) => {
   try {
-    FacultySchema.create(faculty); // Adds a new faculty member to the database
+    await FacultySchema.create(faculty); // Adds a new faculty member to the database
     console.log(`Successfully inserted ${faculty.name} into the database!`);
   } catch (error) {
     console.error('Error seeding data:', error);
@@ -95,11 +96,27 @@ app.get('/api/FetchCourses', async (req, res) => {
   }
 });
 
+
+app.post('/api/RegisterUser', async (req, res) => {
+  const user = req.body as Partial<ILogin>; 
+  const {passwordHash} = req.body as { passwordHash: string }; // Extract the password from the request body
+  user.passwordHash = await bcrypt.hash(passwordHash, 10); // Hash the password before storing it
+  try {
+    await seedUserDatabase(user)
+    res.status(201).json({ 
+      success: true,
+      message: `Database of the ${user.email} seeded successfully!`, 
+    });
+  } catch (error) {
+    console.error('Error adding user:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 app.post('/api/AddFaculty', async (req, res) => {
   const faculty = req.body as Partial<IFaculty>; // Assuming faculty data is sent in the request body
   try {
-    const newFaculty = await seedFacultyDatabase(faculty);
-
+    await seedFacultyDatabase(faculty);
 
     res.status(201).json({ 
      success: true,
@@ -112,24 +129,12 @@ app.post('/api/AddFaculty', async (req, res) => {
 
 });
 
-app.post('/api/RegisterUser', async (req, res) => {
-  const user = req.body as Partial<ILogin>; // Assuming user data is sent in the request body
-  try {
-    const newUser = await seedRegisterDatabase(user); // Assuming user data is sent in the request body
-    res.status(201).json({ 
-      success: true,
-      message: `Database of the ${user.email} seeded successfully!`, 
-    });
-  } catch (error) {
-    console.error('Error adding user:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
 app.post('/api/AddStudent', async (req, res) => {
-  const student = req.body as Partial<IStudent>; // Assuming student data is sent in the request body
+  const student = req.body as Partial<IStudent>; 
+  const {password} = req.body as { password: string }; // Extract the password from the request body
+  student.password = await bcrypt.hash(password, 10);// Hash the password before storing it
   try {
-    const newStudent = await seedStudentDatabase(student); // Assuming student data is sent in the request body
+    await seedStudentDatabase(student); 
     res.status(201).json({ 
       success: true,
       message: 'Database seeded successfully!', 
@@ -143,9 +148,8 @@ app.post('/api/AddStudent', async (req, res) => {
 
 
 app.post('/api/FetchStudent/:studentEmailId', async (req, res) => {
-   console.log('FetchStudent route reached!');
   const { studentEmailId } = req.params;
-  const password = req.body.password as string; // Assuming password is sent in the request body
+  const password = req.body.password as string; 
   try {
 
     const student = await UserSchema.findOne({
@@ -157,16 +161,19 @@ app.post('/api/FetchStudent/:studentEmailId', async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const isPasswordValid = student.passwordHash === password; // Replace with actual password validation logic
+    const isPasswordValid = await bcrypt.compare(
+        password,
+        student.passwordHash
+    ); 
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-
      return res.json({
-            id: student._id.toString(),
-            email: student.email,
-            role: student.role
+            id: student?._id.toString(),
+            name: student?.name,
+            email: student?.email,
+            role: "student"
         });
     
   } catch (error) {
@@ -174,6 +181,45 @@ app.post('/api/FetchStudent/:studentEmailId', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+app.post('/api/FetchFaculty/:facultyEmailId', async (req, res) => {
+   console.log('FetchFaculty route reached!');
+  const { facultyEmailId  } = req.params;
+  const password = req.body.password as string; // Assuming password is sent in the request body
+  try {
+
+    const faculty = await UserSchema.findOne({
+      email: facultyEmailId
+    }).select("+passwordHash");
+    
+
+    if (!faculty) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+        password,
+        faculty.passwordHash
+    ); 
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+
+     return res.json({
+            id: faculty._id.toString(),
+            name: faculty.name,
+            email: faculty.email,
+            role: faculty.role
+        });
+    
+  } catch (error) {
+    console.error('Error fetching faculty:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);

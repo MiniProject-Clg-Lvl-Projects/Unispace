@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useApp } from '../context'
 import { Btn, Input } from '../components/ui'
-import type { ILogin, Role } from '../types'
-import {VerifyStudentData,AddUserData} from '../services/LoginRelatedFunctions.tsx'
+import type { ILogin, Role,IStudent,IFaculty } from '../types'
+import {VerifyStudentData,VerifyFacultyData,AddUserData,AddFacultyData,AddStudentData} from '../services/LoginRelatedFunctions.tsx'
+
 
 type Mode = 'select' | 'login' | 'register'
 
@@ -16,6 +17,7 @@ export default function Login() {
   const isRegister = currentScreen === 'register'
   const [mode, setMode] = useState<Mode>('select')
   const [role, setRole] = useState<Role>('faculty')
+  const [id, setId] = useState('')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -30,8 +32,33 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (!email || !password) { setError('Please fill in all fields.'); return }
-    const person =await VerifyStudentData(email, password);
-    
+
+    let person: IStudent | IFaculty | undefined;
+    if(role === 'student'){
+      
+      try {
+          person = await VerifyStudentData(email, password);
+          
+      } catch (error) {
+          setError("Login failed. Check your credentials or server.");
+          return;
+      }
+      
+    }
+    else if(role === 'faculty'){
+      try {
+        person =await VerifyFacultyData(email, password);
+       
+      } catch (error) {
+          setError("Login failed. Check your credentials or server.");
+          return;
+      }
+      
+    }
+    if (!person) {
+      setError("Unable to retrieve user data.");
+      return;
+    }
     login(role, person?.name, person?.email)
   }
 
@@ -39,13 +66,37 @@ export default function Login() {
     if (!name || !email || !password) { setError('Please fill in all required fields.'); return }
     
     const User: Partial<ILogin> = {
+      name: name,
       email: email,
       passwordHash: password,
       role: role,
       isActive: true
     };
+    
+    if(role === 'faculty'){
+      if(!dept){setError('Please fill in the department field.'); return }
+      
+      await AddFacultyData({
+        name: name,
+        email: email,
+        password: password,
+        Department: dept,
+        enrolledCourses: [],
+      });
+    }
 
-    const person = await AddUserData(User);
+    if(role === 'student'){
+        if(!id){setError('Please fill in the department field.'); return }
+        await AddStudentData({
+          name: name,
+          email: email,
+          password:password,
+          studentId : id,
+          enrolledCourses: [],
+      });
+    }  
+
+    await AddUserData(User);
     login(role, name, email)
   }
 
@@ -185,7 +236,7 @@ export default function Login() {
               <div className="space-y-4 mb-6">
                 <Input label="Full Name" value={name} onChange={e => setName(e.target.value)} placeholder="Dr. Jane Smith" />
                 <Input label="Email Address" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@campizo.edu" />
-                {role === 'student' && <Input label="Student ID" placeholder="CSE2024001" />}
+                {role === 'student' && <Input label="Student ID"  value={id} onChange={e=> setId(e.target.value)} placeholder="CSE2024001" />}
                 {role === 'faculty' && <Input label="Department" value={dept} onChange={e => setDept(e.target.value)} placeholder="Computer Science Engineering" />}
                 <Input label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Create a strong password" />
               </div>

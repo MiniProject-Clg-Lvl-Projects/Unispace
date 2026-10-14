@@ -51,6 +51,8 @@ export interface ICourse {
 }
 
 export interface ILogin extends Document {
+  id: string;
+  name:string;
   email: string;
   passwordHash: string;
   role: Role;
@@ -81,7 +83,8 @@ export interface IFaculty  {
   id: string
   name: string
   email: string
-  facultyId: string
+  password:string 
+  Department: string
   enrolledCourses: IEnrolledCourse[]
 }
 
