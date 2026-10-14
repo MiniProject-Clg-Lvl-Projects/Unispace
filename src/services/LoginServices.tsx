@@ -1,6 +1,6 @@
 import type { IStudent,IFaculty, IUser, ILogin} from '../types.ts';
 
-export const getStudentData = async (studentEmailId: string, password: string): Promise<ILogin> => {
+export const getStudentData = async (studentEmailId: string, password: string): Promise<IStudent> => {
     // Fetch student data from the server using the provided email ID
     // Encrypt the email ID before sending it to the server for security purposes
     const response = await fetch(`http://localhost:3000/api/FetchStudent/${encodeURIComponent(studentEmailId)}`, {
@@ -8,9 +8,31 @@ export const getStudentData = async (studentEmailId: string, password: string): 
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ password })
+        body: JSON.stringify({ password})
     }) 
 
+    const responseText = await response.text();
+    console.log(response);
+    if (!response.ok) {
+            throw new Error(
+          `HTTP ${response.status}: ${responseText}`
+    );
+    }
+
+  return JSON.parse(responseText) as IStudent;
+};
+
+export const getFacultyData = async (facultyEmailId: string, password: string): Promise<IFaculty> => {
+    // Fetch faculty data from the server using the provided email ID
+    // Encrypt the email ID before sending it to the server for security purposes
+    const response = await fetch(`http://localhost:3000/api/FetchFaculty/${encodeURIComponent(facultyEmailId)}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password })
+    }) 
+    
     const responseText = await response.text();
 
     if (!response.ok) {
@@ -18,8 +40,7 @@ export const getStudentData = async (studentEmailId: string, password: string): 
           `HTTP ${response.status}: ${responseText}`
     );
     }
-
-  return JSON.parse(responseText) as ILogin;
+  return JSON.parse(responseText) as IFaculty;
 };
 
 export const RegisterUser = async (user: Partial<ILogin>) => {
@@ -52,7 +73,7 @@ export const RegisterStudentData = async (student: Partial<IStudent>) => {
   if (!response.ok) {
     const error = await response.text();
     console.error('API error:', response.status, error);
-    throw new Error(`Failed to create faculty: ${response.status}`);
+    throw new Error(`Failed to create student: ${response.status}`);
   }
   return response.json();
 };

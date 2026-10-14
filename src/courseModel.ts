@@ -1,28 +1,25 @@
 import { Schema, model } from 'mongoose';
 import type { IContentItem,IUnit,ICourse, IStudent, ILogin, IFaculty} from './types.ts'
 
-const userSchema = new Schema<ILogin>(
-  {
+const userSchema = new Schema<ILogin>({
+    name: {type: String, required:true,trim: true},
     email: {type: String,required: true,unique: true,lowercase: true,trim: true},
     passwordHash: {type: String,required: true,select: false},
     role: {type: String,enum: ['student', 'faculty', 'admin'],required: true},
     isActive: { type: Boolean,default: true}
-  },{timestamps: true}
-);
+  },{timestamps: true});
 
 const facultySchema = new Schema<IFaculty >({
-  id: { type: String, required: true },
   name: { type: String, required: true },
   email: { type: String, required: true },
-  facultyId: { type: String, required: true }
-},{_id: false });
+  Department: { type: String, required: true }
+});
 
 const studentSchema = new Schema<IStudent>({
-  id: { type: String, required: true },
   name: { type: String, required: true },
   email: { type: String, required: true },
   studentId: { type: String, required: true }
-},{_id: false });
+});
 
 const contentSchema = new Schema<IContentItem>({
   id: { type: String, required: true },
