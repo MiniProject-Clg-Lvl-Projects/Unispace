@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../../context'
 import { Btn, Input, Textarea, Select } from '../../components/ui'
 import type { ICourse } from '../../types'
-import { createCourse } from '../../services/courseService.tsx'
+import { createCourse} from '../../services/courseService.tsx'
 
 export default function CreateCourse() {
   const { courses, setCourses, navigate, showToast } = useApp()
@@ -29,7 +29,7 @@ export default function CreateCourse() {
       approvalStatus: 'pending',
       units: [],
       syllabus: form.syllabus.split('\n').filter(Boolean).map((t, i) => ({
-        id: `s_new_${i}`, topic: t.trim(), hours: 4, description: ''
+        id: `s_new_${i}`, topic: t.trim(), hours: 4, description: '' // Replace the numebr of hours here
       })),
       experiments: form.experiments.split('\n').filter(Boolean).map((t, i) => ({
         id: `e_new_${i}`, title: t.trim(), description: '', materials: ''
