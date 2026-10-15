@@ -62,12 +62,12 @@ export interface ILogin extends Document {
 }
 
 export interface IEnrolledCourse {
-  courseId: string
-  progress: number
-  status: EnrollStatus
-  currentUnit: string
-  enrolledAt: string
-  completedAt?: string
+  course: string |ICourse; 
+  progress: number;
+  status: 'not-started' | 'in-progress' | 'completed';
+  currentUnit?: string;
+  enrolledAt: string;
+  completedAt?: string;
 }
 
 export interface IStudent {
@@ -85,6 +85,7 @@ export interface IFaculty  {
   email: string
   password:string 
   Department: string
+  facultyId: string
   enrolledCourses: IEnrolledCourse[]
 }
 

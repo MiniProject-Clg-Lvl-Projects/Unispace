@@ -113,7 +113,6 @@ const {
 
 
 export default function App() {
-  console.log('App rendered') 
   return (
     <AppProvider>
       <AppShell />

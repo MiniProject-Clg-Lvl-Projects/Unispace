@@ -43,6 +43,12 @@ export default function Login() {
           setError("Login failed. Check your credentials or server.");
           return;
       }
+          if (!person) {
+      setError("Unable to retrieve user data.");
+      return;
+    }
+    console.log(person.studentId);
+    login(person.studentId,role, person?.name, person?.email)
       
     }
     else if(role === 'faculty'){
@@ -53,13 +59,15 @@ export default function Login() {
           setError("Login failed. Check your credentials or server.");
           return;
       }
-      
-    }
+
     if (!person) {
       setError("Unable to retrieve user data.");
       return;
     }
-    login(role, person?.name, person?.email)
+    login(person.facultyId,role, person?.name, person?.email)
+      
+    }
+
   }
 
   const handleRegister = async () => {
@@ -74,19 +82,16 @@ export default function Login() {
     };
     
     if(role === 'faculty'){
-      if(!dept){setError('Please fill in the department field.'); return }
-      
       await AddFacultyData({
         name: name,
         email: email,
         password: password,
-        Department: dept,
+        facultyId: id,
         enrolledCourses: [],
       });
     }
 
     if(role === 'student'){
-        if(!id){setError('Please fill in the department field.'); return }
         await AddStudentData({
           name: name,
           email: email,
@@ -97,7 +102,7 @@ export default function Login() {
     }  
 
     await AddUserData(User);
-    login(role, name, email)
+    login(id,role, name, email)
   }
 
   return (
@@ -105,8 +110,8 @@ export default function Login() {
       {/* Left panel */}
       <div className="hidden lg:flex flex-col justify-between w-2/5 p-12" style={{ background: 'linear-gradient(160deg, #0f0525, #050e1d)' }}>
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('landing')}>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white" style={{ background: 'linear-gradient(135deg, #7c3aed, #0d9488)' }}>C</div>
-          <span className="text-xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>CAMPIZO</span>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white" style={{ background: 'linear-gradient(135deg, #7c3aed, #0d9488)' }}>Uni</div>
+          <span className="text-xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>UNIPSACE</span>
         </div>
         <div>
           <blockquote className="text-2xl font-semibold text-white leading-relaxed mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>
@@ -133,8 +138,8 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-2 mb-8 cursor-pointer" onClick={() => navigate('landing')}>
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white text-sm" style={{ background: 'linear-gradient(135deg, #7c3aed, #0d9488)' }}>C</div>
-            <span className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>CAMPIZO</span>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-white text-sm" style={{ background: 'linear-gradient(135deg, #7c3aed, #0d9488)' }}>Uni</div>
+            <span className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>UNIPSACE</span>
           </div>
 
           {mode === 'select' && (
@@ -236,8 +241,8 @@ export default function Login() {
               <div className="space-y-4 mb-6">
                 <Input label="Full Name" value={name} onChange={e => setName(e.target.value)} placeholder="Dr. Jane Smith" />
                 <Input label="Email Address" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@campizo.edu" />
-                {role === 'student' && <Input label="Student ID"  value={id} onChange={e=> setId(e.target.value)} placeholder="CSE2024001" />}
-                {role === 'faculty' && <Input label="Department" value={dept} onChange={e => setDept(e.target.value)} placeholder="Computer Science Engineering" />}
+                {role === 'student' && <Input label="Student ID"  value={id} onChange={e=> setId(e.target.value)} placeholder="CSES2026001" />}
+                {role === 'faculty' && <Input label="Faculty ID" value={id} onChange={e => setId(e.target.value)} placeholder="CSEF20260001" />}
                 <Input label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Create a strong password" />
               </div>
               {error && <p className="text-sm mb-4" style={{ color: '#f87171' }}>{error}</p>}

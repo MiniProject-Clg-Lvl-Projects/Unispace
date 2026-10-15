@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { connectDB } from './DBConnection.ts';
 import { CourseSchema,StudentSchema,FacultySchema, UserSchema} from './courseModel.ts';
-import type { ICourse, IStudent, IFaculty, ILogin,IUnit} from './types.ts';
+import type { ICourse, IStudent, IFaculty, ILogin,IUnit,IEnrolledCourse} from './types.ts';
 import bcrypt from 'bcrypt';
 
 const app = express();
@@ -35,7 +35,6 @@ export const seedUserDatabase = async (user: Partial<ILogin> = {}) => {
 };
 
 
-
 // Use for seeding the database with initial student data.
 export const seedStudentDatabase = async (student: Partial<IStudent> = {}) => {
   try {
@@ -66,7 +65,7 @@ app.get('/', (req, res) => {
 });
 
 // Required for Faculty to seed the database with initial courses.
-app.post("/api/AddCourses", async (req, res) => {
+app.post('/api/AddCourses', async (req, res) => {
   try {
     const course = req.body as Partial<ICourse>;
     const totalInserted = await seedCoursesDatabase(course);
@@ -83,11 +82,11 @@ app.post("/api/AddCourses", async (req, res) => {
   }
 });
 
-app.patch("/api/courses/:CourseCode/units",async (req,res)=>{
+app.patch('/api/courses/:CourseCode/units',async (req,res)=>{
   try{
     const {CourseCode} = req.params;
     const unit = req.body as IUnit;
-    console.log(unit);
+
     const UpdateCourse = await CourseSchema.updateOne(
       {code: CourseCode},
       { $push: { units: unit } },
@@ -116,6 +115,19 @@ app.patch("/api/courses/:CourseCode/units",async (req,res)=>{
 
 });
 
+app.get('/api/FectchStundentDetail/:studentID',async (req,res)=>{
+    const {studentID} = req.params;
+    try{
+      
+      const student = await StudentSchema.findOne({studentId:studentID });
+      res.json(student);
+    }catch(error){
+      console.error('Error fetching student:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+
+
+})
 
 app.get('/api/FetchCourses', async (req, res) => {
   try {
@@ -188,33 +200,115 @@ app.post('/api/AddStudent', async (req, res) => {
 
 });
 
+app.patch('/api/EnrollCourse/:studentId',async (req,res) =>{
+  const {studentId } =  req.params;
+  const course = req.body;
+  try{
+
+    const EnrollCourse = await StudentSchema.updateOne(
+      {studentId: studentId},
+      { $push: { enrolledCourses: course } },
+      {runValidators: true }
+    );
+    if(EnrollCourse.matchedCount ===0){
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    if (!EnrollCourse) {
+      return res.status(404).json({
+          message: 'Course not found'
+      });
+    }
+    
+    return res.status(200).json({
+      message: 'Enrolled successfully',
+      course: EnrollCourse
+    });
+  }catch(error){
+      return res.status(500).json({
+            message: 'Failed to add unit' + error
+      });
+  }
+});
+
+app.get('/api/FetchStudentEnrolledCourses/:StudentId',async(req,res)=>{
+      const {StudentId} = req.params;
+
+      try{
+        const student = await StudentSchema.findOne({studentId : StudentId});
+        
+        if(!student){
+          return res.status(404).json({ message: 'Student not found' });
+        }
+        
+        return res.status(200).json({
+              message: 'Enrolled successfully',
+              courses: student.enrolledCourses 
+        });
+
+
+      }catch(error){
+          return res.status(500).json({
+            message: 'Failed to Fetch enrolled courses' + error
+        });
+      }
+
+});
+
+app.post('/api/FetchFacultyEnrolledCourses/:FacultyId',async(req,res)=>{
+      const {FacultyId} = req.params;
+
+      try{
+        const faculty = await StudentSchema.findOne({studentId : FacultyId});
+        
+        if(!faculty){
+          return res.status(404).json({ message: 'Student not found' });
+        }
+        
+        return res.status(200).json({
+              message: 'Enrolled successfully',
+              courses: faculty.enrolledCourses as IEnrolledCourse[]
+        });
+
+
+      }catch(error){
+          return res.status(500).json({
+            message: 'Failed to Fetch enrolled courses' + error
+        });
+      }
+
+});
 
 app.post('/api/FetchStudent/:studentEmailId', async (req, res) => {
   const { studentEmailId } = req.params;
   const password = req.body.password as string; 
   try {
 
-    const student = await UserSchema.findOne({
+    const user = await UserSchema.findOne({
       email: studentEmailId
     }).select("+passwordHash");
     
+    const student = await StudentSchema.findOne({
+      email: studentEmailId
+    });
 
-    if (!student) {
+    if (!user || !student) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
     const isPasswordValid = await bcrypt.compare(
         password,
-        student.passwordHash
+        user.passwordHash
     ); 
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
      return res.json({
-            id: student?._id.toString(),
+            id: user._id.toString(),
             name: student?.name,
             email: student?.email,
+            studentId: student?.studentId,
             role: "student"
         });
     
@@ -224,24 +318,27 @@ app.post('/api/FetchStudent/:studentEmailId', async (req, res) => {
   }
 });
 
+
 app.post('/api/FetchFaculty/:facultyEmailId', async (req, res) => {
    console.log('FetchFaculty route reached!');
   const { facultyEmailId  } = req.params;
-  const password = req.body.password as string; // Assuming password is sent in the request body
+  const password = req.body.password as string; 
   try {
 
-    const faculty = await UserSchema.findOne({
+    const user = await UserSchema.findOne({
       email: facultyEmailId
     }).select("+passwordHash");
     
+    const faculty = await FacultySchema.findOne({
+      email: facultyEmailId
+    });
 
-    if (!faculty) {
+    if (!user || !faculty) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
-
     const isPasswordValid = await bcrypt.compare(
         password,
-        faculty.passwordHash
+        user.passwordHash
     ); 
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid email or password' });
@@ -252,7 +349,8 @@ app.post('/api/FetchFaculty/:facultyEmailId', async (req, res) => {
             id: faculty._id.toString(),
             name: faculty.name,
             email: faculty.email,
-            role: faculty.role
+            facultyId: faculty.facultyId,
+            role: 'faculty'
         });
     
   } catch (error) {

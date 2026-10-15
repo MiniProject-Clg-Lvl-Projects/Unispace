@@ -12,7 +12,6 @@ export const getStudentData = async (studentEmailId: string, password: string): 
     }) 
 
     const responseText = await response.text();
-    console.log(response);
     if (!response.ok) {
             throw new Error(
           `HTTP ${response.status}: ${responseText}`
@@ -22,6 +21,23 @@ export const getStudentData = async (studentEmailId: string, password: string): 
   return JSON.parse(responseText) as IStudent;
 };
 
+export const getStudentDetail = async (studentID: string): Promise<IStudent> =>{
+  const response = await fetch(`http://localhost:3000/api/FectchStundentDetail/${encodeURIComponent(studentID)}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }) 
+
+    const responseText = await response.text();
+    if (!response.ok) {
+        throw new Error(
+        `HTTP ${response.status}: ${responseText}`
+    );
+    }
+
+    return JSON.parse(responseText) as IStudent;
+};
 export const getFacultyData = async (facultyEmailId: string, password: string): Promise<IFaculty> => {
     // Fetch faculty data from the server using the provided email ID
     // Encrypt the email ID before sending it to the server for security purposes
