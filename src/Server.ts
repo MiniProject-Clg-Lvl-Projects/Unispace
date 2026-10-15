@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { connectDB } from './DBConnection.ts';
 import { CourseSchema,StudentSchema,FacultySchema, UserSchema} from './courseModel.ts';
-import type { ICourse, IStudent, IFaculty, ILogin } from './types.ts';
+import type { ICourse, IStudent, IFaculty, ILogin,IUnit} from './types.ts';
 import bcrypt from 'bcrypt';
 
 const app = express();
@@ -69,21 +69,53 @@ app.get('/', (req, res) => {
 app.post("/api/AddCourses", async (req, res) => {
   try {
     const course = req.body as Partial<ICourse>;
-    console.log('Course ID:', course.id)
-    console.log('Full request body:', req.body)
-    // TODO Need to pass a course object to seedCoursesDatabase function. 
-    const totalInserted = await seedCoursesDatabase(course); // Assuming ICourse is the course you want to seed
+    const totalInserted = await seedCoursesDatabase(course);
     
     res.status(201).json({ 
       success: true,
       message: 'Database seeded successfully!', 
       count: totalInserted 
     });
+
   } catch (error) {
     console.error('Error seeding database:', error);
     res.status(500).json({ success: false, message: (error as Error).message });
   }
 });
+
+app.patch("/api/courses/:CourseCode/units",async (req,res)=>{
+  try{
+    const {CourseCode} = req.params;
+    const unit = req.body as IUnit;
+    console.log(unit);
+    const UpdateCourse = await CourseSchema.updateOne(
+      {code: CourseCode},
+      { $push: { units: unit } },
+      {runValidators: true }
+    );
+
+    if(UpdateCourse.matchedCount ===0){
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    if (!UpdateCourse) {
+      return res.status(404).json({
+          message: 'Course not found'
+      });
+    }
+    
+    return res.status(200).json({
+      message: 'Unit added successfully',
+      course: UpdateCourse
+    });
+  }catch(error){
+      return res.status(500).json({
+            message: 'Failed to add unit' + error
+      });
+  }
+
+});
+
 
 app.get('/api/FetchCourses', async (req, res) => {
   try {
@@ -96,6 +128,16 @@ app.get('/api/FetchCourses', async (req, res) => {
   }
 });
 
+app.get('/api/FetchCourse/:CourseID', async (req, res) => {
+  const {CourseID} = req.params;
+  try {
+    const courses = await CourseSchema.findOne({code: CourseID});
+    res.json(courses);
+  }catch (error) {
+    console.error('Error fetching courses:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 app.post('/api/RegisterUser', async (req, res) => {
   const user = req.body as Partial<ILogin>; 

@@ -2,14 +2,15 @@ import { useState } from 'react'
 import { useApp } from '../../context'
 import { Btn, Badge, StatusBadge } from '../../components/ui'
 
-const STUDENT_ID = 'st1' //Remove this and use the logged-in student from context when authentication is implemented
+ 
 
 export default function GlobalCourses() {
+  const STUDENT_ID = 'st1'//Remove this and use the logged-in student from context when authentication is implemented
   const { courses, students, setCourses, setStudents, navigate, showToast } = useApp()
   const [activeTab, setActiveTab] = useState<'global' | 'institute'>('global')
   const [enrolling, setEnrolling] = useState<string | null>(null)
 
-  const me = students.find(s => s.id === STUDENT_ID)
+  const me = students.find(s => s.studentId === STUDENT_ID)
   const myEnrolled = new Set(me?.enrolledCourses.map(e => e.courseId) ?? [])
   const available = courses.filter(c => c.approvalStatus === 'approved')
 
@@ -19,7 +20,7 @@ export default function GlobalCourses() {
     setTimeout(() => {
       setCourses(prev => prev.map(c => c.id === courseId ? { ...c, enrolledStudents: [...c.enrolledStudents, STUDENT_ID] } : c))
       setStudents(prev => prev.map(s =>
-        s.id === STUDENT_ID
+        s.studentId === STUDENT_ID
           ? { ...s, enrolledCourses: [...s.enrolledCourses, { courseId, progress: 0, status: 'not-started', currentUnit: '', enrolledAt: now }] }
           : s
       ))

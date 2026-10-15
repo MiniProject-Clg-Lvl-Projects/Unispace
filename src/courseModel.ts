@@ -1,5 +1,7 @@
 import { Schema, model } from 'mongoose';
-import type { IContentItem,IUnit,ICourse, IStudent, ILogin, IFaculty} from './types.ts'
+import type { IContentItem,IUnit,ICourse, IStudent, ILogin, IFaculty,ISyllabusItem,IExperiment} from './types.ts'
+
+
 
 const userSchema = new Schema<ILogin>({
     name: {type: String, required:true,trim: true},
@@ -34,6 +36,20 @@ const unitSchema = new Schema<IUnit>({
   content: [contentSchema]
 },{ _id: false });
 
+const syllabusItemSchma = new Schema<ISyllabusItem>({
+  id: {type:String,default:''},
+  topic: {type:String,default:''},
+  hours: {tyep: Number},
+  description: {type:String,default:''},
+},{ _id: false })
+
+const experimentSchma = new Schema<IExperiment>({
+  id: {type:String,default:''},
+  title: {type: String,default:''},
+  description: {type:String,default:''},
+  materials: {type:String,default:''}
+},{ _id: false })
+
 const courseSchema = new Schema<ICourse>({
   id: { type: String, required: true },
   title:{ type: String, required: true },
@@ -44,7 +60,10 @@ const courseSchema = new Schema<ICourse>({
   category: { type: String, required: true },
   level: { type: String, required: true },
   status: { type: String, required: true },
-  units: [unitSchema]
+  units: [unitSchema],
+  syllabus:  [syllabusItemSchma],
+  experiments: [experimentSchma],
+  enrolledStudents:[String],
 });
 
 export const UserSchema = model<ILogin>('users', userSchema);

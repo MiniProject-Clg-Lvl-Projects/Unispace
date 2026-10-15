@@ -8,10 +8,9 @@ import type { ICourse, IContentItem } from '../../types'
 
 export default function StudentCourseDetail({
   course,
-  content
 }: {
   course: ICourse
-  content: IContentItem[] | undefined
+  content: IContentItem | undefined
 }) {
   const [expandedUnits, setExpandedUnits] = useState<string[]>([])
   const [selectedItem, setSelectedItem] = useState<IContentItem | null>(null)

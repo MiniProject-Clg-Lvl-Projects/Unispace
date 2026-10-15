@@ -1,7 +1,7 @@
 import { useApp } from '../../context'
 import { Btn, StatCard, ProgressBar, EmptyState, StatusBadge } from '../../components/ui'
 import type { Screen } from '../../types'
-import type { ICourse, IContentItem } from '../../types'
+
 
 const STUDENT_ID = 'st1'
 
@@ -106,13 +106,8 @@ export default function StudentMyLearning() {
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    {/*TODO:Add the screen for the course detail view 
-                    <Btn size="sm" variant={enrollment.status === 'completed' ? 'secondary' : 'primary'} onClick={() => StudentCourseDetail( { course, content:  course.units.find(u => u.title === enrollment.currentUnit)?.content})}>
-                      {enrollment.status === 'completed' ? 'Review' : enrollment.status === 'not-started' ? 'Start →' : 'Continue →'}
-                    </Btn>*/}
                     <Btn size="sm" variant={enrollment.status === 'completed' ? 'secondary' : 'primary'} onClick={() =>{
-                      console.log('Course being passed:', course)
-                      navigate( 'student-course-detail',{course, content:  course.units.find(u => u.title === enrollment.currentUnit)?.content})}}>
+                      navigate( 'student-course-detail',{course})}}>
                       {enrollment.status === 'completed' ? 'Review' : enrollment.status === 'not-started' ? 'Start →' : 'Continue →'}
                     </Btn>
                   </div>

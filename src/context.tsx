@@ -5,7 +5,7 @@ import { getCourses,createCourse } from './services/courseService.tsx'
 
 interface NavData {
   course?: ICourse
-  content?: IContentItem[]
+  content?: IContentItem
   filter?: string
 }
 
@@ -15,7 +15,7 @@ interface AppState {
   courses: ICourse[]
   students: IStudent[]
   selectedCourse: ICourse | null
-  selectedContent: IContentItem[] | undefined
+  selectedContent: IContentItem | undefined
   screenFilter: string
   navigate: (screen: Screen, data?: NavData) => void
   goBack: () => void
@@ -40,12 +40,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState<boolean>(true)
   const [students, setStudents] = useState<IStudent[]>([])
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null)
-  const [selectedContent, setSelectedContent] = useState<IContentItem[] | undefined>(undefined)
+  const [selectedContent, setSelectedContent] = useState<IContentItem | undefined>(undefined)
   const [screenFilter, setScreenFilter] = useState<string>('')
   const [history, setHistory] = useState<Screen[]>([])
   const [toast, setToast] = useState<string | null>(null)
   const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success')
-
 
 
   useEffect(() => {
@@ -56,6 +55,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       .catch((err) => console.error('Failed to load courses in AppContext:', err))
       .finally(() => setLoading(false))
   }, []) // empty dependency array ensures this runs only once on mount
+
 
   const navigate = useCallback((screen: Screen, data?: NavData) => {
     setHistory(prev => [...prev, currentScreen])
