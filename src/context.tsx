@@ -3,6 +3,7 @@ import type { ICourse, IStudent, IUser, Screen, IContentItem } from './types.ts'
 
 import { getCourses,createCourse } from './services/courseService.tsx' 
 
+
 interface NavData {
   course?: ICourse
   content?: IContentItem
@@ -22,7 +23,7 @@ interface AppState {
   setCourses: React.Dispatch<React.SetStateAction<ICourse[]>>
   setStudents: React.Dispatch<React.SetStateAction<IStudent[]>>
   setSelectedCourse: (c: ICourse | null) => void
-  login: (role: 'faculty' | 'student', name: string, email: string) => void
+  login: (id:string,role: 'faculty' | 'student', name: string, email: string) => void
   logout: () => void
   toast: string | null
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void
@@ -76,8 +77,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const login = useCallback((role: 'faculty' | 'student', name: string, email: string ) => {
-    setCurrentUser({ id: role === 'faculty' ? 'f1' : 'st_logged', name, email, role, department: 'Computer Science Engineering' })
+  const login = useCallback((id: string,role: 'faculty' | 'student', name: string, email: string ) => {
+
+    setCurrentUser({ id: id, name, email, role, department: 'Computer Science Engineering' })
     setCurrentScreen(role === 'faculty' ? 'faculty-dashboard' : 'student-dashboard')
     setHistory([])
   }, [])

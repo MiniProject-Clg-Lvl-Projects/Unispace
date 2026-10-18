@@ -26,8 +26,8 @@ export default function Landing() {
       <header className="flex items-center justify-between px-8 py-4 max-w-7xl mx-auto">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-base"
-            style={{ background: 'linear-gradient(135deg, #7c3aed, #0d9488)' }}>C</div>
-          <span className="text-xl font-bold text-white tracking-wide" style={{ fontFamily: 'Outfit, sans-serif' }}>CAMPIZO</span>
+            style={{ background: 'linear-gradient(135deg, #7c3aed, #0d9488)' }}>Uni</div>
+          <span className="text-xl font-bold text-white tracking-wide" style={{ fontFamily: 'Outfit, sans-serif' }}>UNISPACE</span>
         </div>
         <div className="flex items-center gap-3">
           <Btn variant="ghost" onClick={() => navigate('login')}>Sign In</Btn>
@@ -49,7 +49,7 @@ export default function Landing() {
           </span>
         </h1>
         <p className="text-lg max-w-2xl mx-auto mb-10" style={{ color: '#64748b', lineHeight: '1.8' }}>
-          CAMPIZO unifies course management, student enrollment, content delivery, and learning analytics into a single, intuitive platform designed for faculty and students.
+          UNISPACE unifies course management, student enrollment, content delivery, and learning analytics into a single, intuitive platform designed for faculty and students.
         </p>
         <div className="flex items-center justify-center gap-4 flex-wrap">
           <Btn size="lg" onClick={() => navigate('login')}>
@@ -96,7 +96,7 @@ export default function Landing() {
           <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(124,58,237,0.15) 0%, transparent 60%), radial-gradient(circle at 70% 50%, rgba(13,148,136,0.15) 0%, transparent 60%)' }} />
           <div className="relative">
             <h2 className="text-3xl font-bold text-white mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>Ready to transform your campus?</h2>
-            <p className="mb-8" style={{ color: '#94a3b8' }}>Join thousands of students and faculty on CAMPIZO.</p>
+            <p className="mb-8" style={{ color: '#94a3b8' }}>Join thousands of students and faculty on UNISPACE.</p>
             <div className="flex items-center justify-center gap-4">
               <Btn size="lg" onClick={() => navigate('register')}>Create Account</Btn>
               <Btn size="lg" variant="secondary" onClick={() => navigate('login')}>Sign In</Btn>
@@ -106,7 +106,7 @@ export default function Landing() {
       </section>
 
       <footer className="border-t text-center py-6 text-sm" style={{ borderColor: '#1a2540', color: '#334155' }}>
-        © 2024 CAMPIZO · Educational ERP Platform · All rights reserved
+        © 2024 UNISPACE · Educational ERP Platform · All rights reserved
       </footer>
     </div>
   )

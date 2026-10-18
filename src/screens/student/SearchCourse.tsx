@@ -1,27 +1,41 @@
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import { useApp } from '../../context'
 import { Btn, Badge, StatusBadge } from '../../components/ui'
 import { match } from 'node:assert/strict'
+import {enrollCourse} from '../../services/courseService'
+import { IEnrolledCourse, IStudent } from '@/types'
+import {getStudentDetail} from '../../services/LoginServices'
 
-const STUDENT_ID = 'st1' // Change this to the logged in id
 
 export default function SearchCourse() {
-  const { courses, students, setCourses, setStudents, navigate, showToast } = useApp()
+  const { currentUser,courses, students, setCourses, setStudents, navigate, showToast } = useApp()
   const [query, setQuery] = useState('')
   const [catFilter, setCatFilter] = useState('All')
   const [levelFilter, setLevelFilter] = useState('All')
   const [enrolling, setEnrolling] = useState<string | null>(null)
   const [searched, setSearched] = useState(false)
+  const [myEnrolled,setMyEnrolled] = useState<IEnrolledCourse[]>();
+  
 
-  const me = students.find(s => s.id === STUDENT_ID)
-  const myEnrolled = new Set(me?.enrolledCourses.map(e => e.courseId) ?? [])
+   if(!currentUser) return;
+  const USER_ID = currentUser.id 
+  
+   const [me,setMe] = useState<IStudent>();
+    useEffect(()=>{
+        if(currentUser.role === 'student'){
+          getStudentDetail(USER_ID)
+          .then((data)=>{
+              setMe(data);
+          }).catch((err)=>console.error('Failed to fetch student in AppContext:', err))
+        }
+  
+    },[])
   const categories = ['All', ...Array.from(new Set(courses.map(c => c.category)))]
   const levels = ['All', 'beginner', 'intermediate', 'advanced']
 
   const results = courses.filter(c => {
     if (!searched && !query) return false
     const matchQ = !query || c.title.toLowerCase().includes(query.toLowerCase()) || c.code.toLowerCase().includes(query.toLowerCase()) || c.faculty.toLowerCase().includes(query.toLowerCase())
-    console.log(matchQ, c.title, query)
     const matchCat = catFilter === 'All' || c.category === catFilter
     const matchLevel = levelFilter === 'All' || c.level === levelFilter
     return matchQ && matchCat && matchLevel
@@ -29,20 +43,55 @@ export default function SearchCourse() {
 
   const doSearch = () => { setSearched(true) }
 
-  const enroll = (courseId: string, courseTitle: string) => {
+const enroll = (courseId: string, courseTitle: string) => {
     setEnrolling(courseId)
     const now = new Date().toISOString().split('T')[0]
-    setTimeout(() => {
-      setCourses(prev => prev.map(c => c.id === courseId ? { ...c, enrolledStudents: [...c.enrolledStudents, STUDENT_ID] } : c))
-      
-      setStudents(prev => prev.map(s =>
-        s.id === STUDENT_ID
-          ? { ...s, enrolledCourses: [...s.enrolledCourses, { courseId, progress: 0, status: 'not-started', currentUnit: '', enrolledAt: now }] }
-          : s
-      ))
-      showToast(`Successfully enrolled in "${courseTitle}"!`)
-      setEnrolling(null)
-    }, 600)
+
+    const course = courses.find(c => c.id === courseId);
+    if (!course) return;
+    
+      const enrolledCourse : IEnrolledCourse =                   { 
+                        course: course, 
+                        progress: 0,          
+                        status: 'not-started',             
+                        enrolledAt: now 
+                      };
+    // check if course already exists 
+    enrollCourse(USER_ID, enrolledCourse)
+      .then(() => {
+        
+        setCourses(prev => prev.map(c => 
+          c.id === courseId 
+            ? { ...c, enrolledStudents: [...(c.enrolledStudents || []), USER_ID] } 
+            : c
+        ))
+
+        setStudents(prev => prev.map(s =>
+          s.studentId === USER_ID
+            ? { 
+                ...s, 
+                enrolledCourses: [
+                  ...(s.enrolledCourses || []), 
+                  enrolledCourse
+                ]
+              }
+            : s
+        ))
+
+        setMyEnrolled(prev => [
+          ...(prev || []),
+          enrolledCourse
+        ])
+
+        showToast(`Successfully enrolled in "${courseTitle}"!`)
+      })
+      .catch(err => {
+        console.error('Enrollment failed:', err)
+        showToast('Failed to enroll. Please try again.')
+      })
+      .finally(() => {
+        setEnrolling(null)
+      })
   }
 
   return (
@@ -114,7 +163,13 @@ export default function SearchCourse() {
           </p>
           <div className="space-y-3">
             {results.map(course => {
-              const isEnrolled = myEnrolled.has(course.id)
+              const isEnrolled = myEnrolled?.find(item=>{
+                const enrolledId = typeof item.course === 'string' 
+                ? item.course 
+                : (item.course.id);
+                return enrolledId === course.id;
+
+                })!== undefined;
               return (
                 <div key={course.id} className="rounded-xl p-5 flex items-start gap-5 transition-colors"
                   style={{ background: '#111827', border: '1px solid #1a2540' }}>

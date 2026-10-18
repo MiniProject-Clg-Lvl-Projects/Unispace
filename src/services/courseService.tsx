@@ -1,6 +1,6 @@
 
 import { promises } from 'dns'
-import type { ICourse, IUnit } from '../types.ts'
+import type { ICourse, IEnrolledCourse, IUnit } from '../types.ts'
 
 export const getCourses = async (): Promise<ICourse[]> => {
   const response = await fetch('http://localhost:3000/api/FetchCourses') //replace this with proper server address
@@ -25,6 +25,40 @@ export const getCourse = async(courseCode: string) : Promise<ICourse> => {
 
 }
 
+export async function getStudentEnrolledCourses(id:string) {
+  const response = await fetch(`http://localhost:3000/api/FetchStudentEnrolledCourses/${encodeURIComponent(id)}`,{
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+  })
+  if (!response.ok) {
+    const error = await response.text()
+    console.error('API error:', response.status, error)
+    throw new Error(`Failed to fetch enrolled courses: ${response.status}`)
+  }
+
+    return response.json();
+
+}
+
+export async function getFacultyEnrolledCourses(id:string) : Promise<IEnrolledCourse[]>{
+  const response = await fetch(`http://localhost:3000/api/FetchFacultyEnrolledCourses/${encodeURIComponent(id)}`,{
+      method: 'POST',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+  })
+  if (!response.ok) {
+    const error = await response.text()
+    console.error('API error:', response.status, error)
+    throw new Error(`Failed to fetch enrolled courses: ${response.status}`)
+  }
+  
+  return response.json();
+
+}
+
 export async function createCourse(courseData: ICourse) {
   const response = await fetch('http://localhost:3000/api/AddCourses' , { //replace this with proper server address
     method: 'POST',
@@ -46,8 +80,8 @@ export async function createCourse(courseData: ICourse) {
 
 
 export async function createUnit(unit: IUnit,courseCode: string){
-   console.log(unit);
-    const response = await fetch(`http://localhost:3000/api/courses/${encodeURIComponent(courseCode)}/units` , { //replace this with proper server address
+
+  const response = await fetch(`http://localhost:3000/api/courses/${encodeURIComponent(courseCode)}/units` , { //replace this with proper server address
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -63,3 +97,20 @@ export async function createUnit(unit: IUnit,courseCode: string){
   return response.json()
 }
 
+
+export async function enrollCourse(studentID: string,course:IEnrolledCourse) {
+    const response = await fetch(`http://localhost:3000/api/EnrollCourse/${encodeURIComponent(studentID)}` , { //replace this with proper server address
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(course),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    console.error('API error:', response.status, error)
+    throw new Error(`Failed to create unit: ${response.status}`)
+  }
+  return response.json()
+}

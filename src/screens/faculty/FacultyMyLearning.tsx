@@ -1,19 +1,27 @@
 import { useApp } from '../../context'
 import { CourseCard, Btn, EmptyState } from '../../components/ui'
+import {getFacultyEnrolledCourses,getStudentEnrolledCourses} from '../../services/courseService'
+import { IEnrolledCourse } from '@/types'
+import { useEffect, useState } from 'react'
 
-const enrolledByFaculty = [
-  { courseId: 'c2', progress: 72, status: 'in-progress' as const },
-  { courseId: 'c6', progress: 45, status: 'in-progress' as const },
-  { courseId: 'c4', progress: 100, status: 'completed' as const },
-]
 
 export default function FacultyMyLearning() {
-  const { courses, navigate } = useApp()
+  const {currentUser, courses, navigate } = useApp()
+  const [enrolled,setEnrolled] =useState<IEnrolledCourse[]>();
+  if(!currentUser) return;
 
-  const enrolled = enrolledByFaculty.map(e => ({ ...e, course: courses.find(c => c.id === e.courseId) }))
-    .filter(e => e.course)
+  useEffect(() => {
+    getFacultyEnrolledCourses(currentUser.id)
+    .then((data)=>{
+        setEnrolled(data);
+    })
+    .catch((err) => console.error('Failed to fetch courses in AppContext:', err))
+    
+  },[])
 
-  if (enrolled.length === 0) {
+  
+
+  if (enrolled?.length === 0) {
     return <EmptyState icon="📖" title="No enrolled courses" message="You have not enrolled in any courses yet. Browse the course grid to get started." />
   }
 
@@ -25,8 +33,8 @@ export default function FacultyMyLearning() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {enrolled.map(({ course, progress, status }) => course && (
-          <div key={course.id} className="rounded-xl p-5 flex flex-col gap-4 transition-colors"
+        {enrolled?.map(({course, progress, status }) => course && (
+          <div key={course.code} className="rounded-xl p-5 flex flex-col gap-4 transition-colors"
             style={{ background: '#111827', border: '1px solid #1a2540' }}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xl flex-shrink-0"
@@ -56,7 +64,7 @@ export default function FacultyMyLearning() {
             <Btn
               variant={status === 'completed' ? 'secondary' : 'primary'}
               size="sm"
-              onClick={() => navigate('faculty-course-info', { course })}>
+              onClick={() => navigate('faculty-course-info', {course: courses.find(c=>c.id === course.id)})}>
               {status === 'completed' ? 'Review Course' : 'Continue Learning →'}
             </Btn>
           </div>
