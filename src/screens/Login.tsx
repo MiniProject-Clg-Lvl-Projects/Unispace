@@ -47,7 +47,6 @@ export default function Login() {
       setError("Unable to retrieve user data.");
       return;
     }
-    console.log(person.studentId);
     login(person.studentId,role, person?.name, person?.email)
       
     }
@@ -71,7 +70,7 @@ export default function Login() {
   }
 
   const handleRegister = async () => {
-    if (!name || !email || !password) { setError('Please fill in all required fields.'); return }
+    if (!id || !name || !email || !password) { setError('Please fill in all required fields.'); return }
     
     const User: Partial<ILogin> = {
       name: name,
@@ -80,7 +79,7 @@ export default function Login() {
       role: role,
       isActive: true
     };
-    
+    console.log(name,email,id);
     if(role === 'faculty'){
       await AddFacultyData({
         name: name,

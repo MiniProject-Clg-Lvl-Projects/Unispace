@@ -62,7 +62,7 @@ export interface ILogin extends Document {
 }
 
 export interface IEnrolledCourse {
-  course: string |ICourse; 
+  course: ICourse; 
   progress: number;
   status: 'not-started' | 'in-progress' | 'completed';
   currentUnit?: string;

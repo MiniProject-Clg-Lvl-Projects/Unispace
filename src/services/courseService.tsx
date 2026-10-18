@@ -98,7 +98,7 @@ export async function createUnit(unit: IUnit,courseCode: string){
 }
 
 
-export async function enrollCourse(studentID: string,course:ICourse) {
+export async function enrollCourse(studentID: string,course:IEnrolledCourse) {
     const response = await fetch(`http://localhost:3000/api/EnrollCourse/${encodeURIComponent(studentID)}` , { //replace this with proper server address
     method: 'PATCH',
     headers: {

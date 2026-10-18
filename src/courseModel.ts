@@ -11,41 +11,6 @@ const userSchema = new Schema<ILogin>({
     isActive: { type: Boolean,default: true}
 },{timestamps: true});
 
-
-const enrolledCourseSchema = new Schema({
-    course: { 
-        type: Schema.Types.ObjectId, 
-        ref: 'Course', 
-        required: true 
-    },
-    
-    progress: { type: Number, default: 0 },
-    status: { 
-        type: String, 
-        enum: ['not-started', 'in-progress', 'completed'], 
-        default: 'not-started', 
-        required: true 
-    },
-    enrolledAt: { type: String, required: true },
-    completedAt: { type: String }
-});
-
-
-const facultySchema = new Schema<IFaculty >({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  facultyId : { type: String, required: true },
-  // Department: { type: String, required: true }
-});
-
-const studentSchema = new Schema<IStudent>({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  studentId: { type: String, required: true },
-  enrolledCourses: {type:[enrolledCourseSchema],defualt:[]}
-});
-
-
 const contentSchema = new Schema<IContentItem>({
   id: { type: String, required: true },
   title:{ type: String, required: true },
@@ -88,6 +53,39 @@ const courseSchema = new Schema<ICourse>({
   experiments: [experimentSchma],
   enrolledStudents:[String],
 });
+
+const enrolledCourseSchema = new Schema({
+    course: { 
+        type: courseSchema, 
+        ref: 'Course', 
+        required: true 
+    },
+    
+    progress: { type: Number, default: 0 },
+    status: { 
+        type: String, 
+        enum: ['not-started', 'in-progress', 'completed'], 
+        default: 'not-started', 
+        required: true 
+    },
+    enrolledAt: { type: String, required: true },
+    completedAt: { type: String }
+});
+
+const facultySchema = new Schema<IFaculty >({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  facultyId : { type: String, required: true },
+  // Department: { type: String, required: true }
+});
+
+const studentSchema = new Schema<IStudent>({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  studentId: { type: String, required: true },
+  enrolledCourses: {type:[enrolledCourseSchema],defualt:[]}
+});
+
 
 export const UserSchema = model<ILogin>('users', userSchema);
 export const StudentSchema = model<IStudent>('students', studentSchema);

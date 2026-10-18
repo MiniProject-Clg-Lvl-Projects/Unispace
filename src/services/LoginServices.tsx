@@ -108,6 +108,7 @@ export const RegisterFacultyData = async (faculty: Partial<IFaculty>) => {
     console.error('API error:', response.status, error);
     throw new Error(`Failed to create faculty: ${response.status}`);
   }
+
   return response.json();
 };
 

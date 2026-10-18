@@ -16,7 +16,8 @@
     "express": "^5.2.1",
     "mongoose": "^9.9.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "tsc": "^2.0.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.0.0",

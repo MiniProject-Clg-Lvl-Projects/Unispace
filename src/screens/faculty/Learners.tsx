@@ -1,13 +1,17 @@
 import { useApp } from '../../context'
 import { Btn, EmptyState, StatusBadge, ProgressBar } from '../../components/ui'
+import {enrollCourse} from '../../services/courseService'
+import { ICourse, IEnrolledCourse, IStudent } from '@/types'
+import {getStudentDetail} from '../../services/LoginServices'
 
 export default function Learners() {
-  const { selectedCourse: course, students, navigate } = useApp()
+  const {currentUser, selectedCourse: course, students, navigate } = useApp()
 
   if (!course) return <EmptyState icon="👥" title="No course selected" message="Select a course to view learners." />
-
+  
+  // Fetch student from the course
   const learners = students.filter(s => course.enrolledStudents.includes(s.id))
-  const enrollment = (studentId: string) => students.find(s => s.id === studentId)?.enrolledCourses.find(e => e.courseId === course.id)
+  const enrollment = (studentId: string) => students.find(s => s.id === studentId)?.enrolledCourses.find(e => e.course.id === course.id)
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">

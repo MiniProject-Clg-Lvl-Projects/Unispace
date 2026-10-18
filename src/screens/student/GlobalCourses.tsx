@@ -22,46 +22,11 @@ export default function GlobalCourses() {
 
   },[])
 
-  //  students.find(s => s.studentId === USER_ID)
   const [activeTab, setActiveTab] = useState<'global' | 'institute'>('global')
   const [enrolling, setEnrolling] = useState<string | null>(null)
   const [myEnrolled,setMyEnrolled] = useState<IEnrolledCourse[]>();
   
-  // const myEnrolled = new Set(me?.enrolledCourses.map(e => e.course.code) ?? [])
   const available = courses.filter(c => c.approvalStatus === 'approved')
-/*
-  const enroll = (courseId: string, courseTitle: string) => {
-    setEnrolling(courseId)
-    const now = new Date().toISOString().split('T')[0]
-    setTimeout(() => {
-      const course = courses.find(c=> c.id === courseId);
-      if (!course) return;
-
-      setCourses(prev => prev.map(c => c.id === courseId ? { ...c, enrolledStudents: [...(c.enrolledStudents ), USER_ID] } : c))
-
-    
-      setStudents(prev => prev.map(s =>
-        s.studentId === USER_ID
-          ? { 
-            ...s, 
-            enrolledCourses: [
-              ...(s.enrolledCourses || []), 
-              { 
-                course: course.id, 
-                progress: 0,           
-                status: 'not-started',              
-                enrolledAt: now 
-              }
-            ]
-          }
-        : s
-      ))
-
-      showToast(`Successfully enrolled in "${courseTitle}"!`)
-      setEnrolling(null)
-    }, 600)
-  }
-*/
 
 const enroll = (courseId: string, courseTitle: string) => {
     setEnrolling(courseId)
@@ -70,10 +35,16 @@ const enroll = (courseId: string, courseTitle: string) => {
     const course = courses.find(c => c.id === courseId);
     if (!course) return;
 
-    // 1. Call your backend API first
-    enrollCourse(USER_ID, course)
+  const enrolledCourse : IEnrolledCourse =                   { 
+                    course: course, 
+                    progress: 0,          
+                    status: 'not-started',             
+                    enrolledAt: now 
+                  };
+    // Check if course is already exists
+    enrollCourse(USER_ID, enrolledCourse)
       .then(() => {
-        // 2. Once backend succeeds, update local states
+        
         setCourses(prev => prev.map(c => 
           c.id === courseId 
             ? { ...c, enrolledStudents: [...(c.enrolledStudents || []), USER_ID] } 
@@ -86,12 +57,7 @@ const enroll = (courseId: string, courseTitle: string) => {
                 ...s, 
                 enrolledCourses: [
                   ...(s.enrolledCourses || []), 
-                  { 
-                    course: course, // Passes ICourse object (or course.id if you prefer string)
-                    progress: 0,          
-                    status: 'not-started',             
-                    enrolledAt: now 
-                  }
+                  enrolledCourse
                 ]
               }
             : s
@@ -99,13 +65,7 @@ const enroll = (courseId: string, courseTitle: string) => {
 
         setMyEnrolled(prev => [
           ...(prev || []),
-          {
-            course: course,
-            progress: 0,
-            status: 'not-started',
-            currentUnit: '',
-            enrolledAt: now
-          }
+          enrolledCourse
         ])
 
         showToast(`Successfully enrolled in "${courseTitle}"!`)

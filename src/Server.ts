@@ -168,7 +168,7 @@ app.post('/api/RegisterUser', async (req, res) => {
 });
 
 app.post('/api/AddFaculty', async (req, res) => {
-  const faculty = req.body as Partial<IFaculty>; // Assuming faculty data is sent in the request body
+  const faculty = req.body as Partial<IFaculty>; 
   try {
     await seedFacultyDatabase(faculty);
 
@@ -202,7 +202,7 @@ app.post('/api/AddStudent', async (req, res) => {
 
 app.patch('/api/EnrollCourse/:studentId',async (req,res) =>{
   const {studentId } =  req.params;
-  const course = req.body;
+  const course = req.body as IEnrolledCourse;
   try{
 
     const EnrollCourse = await StudentSchema.updateOne(
