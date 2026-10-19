@@ -9,6 +9,8 @@ export default function AssignStudents() {
 
   if (!course) return <EmptyState icon="👥" title="No course selected" message="Select a course first." />
 
+  
+
   const unassigned = students.filter(s =>
     !course.enrolledStudents.includes(s.id) &&
     (s.name.toLowerCase().includes(search.toLowerCase()) || s.studentId.toLowerCase().includes(search.toLowerCase()) || s.email.toLowerCase().includes(search.toLowerCase()))
@@ -26,7 +28,7 @@ export default function AssignStudents() {
     ))
     setStudents(prev => prev.map(s =>
       selected.includes(s.id)
-        ? { ...s, enrolledCourses: [...s.enrolledCourses, { course: course, progress: 0, status: 'not-started', enrolledAt: now }] }
+        ? { ...s, enrolledCourses: [...s.enrolledCourses, { course: course.code, progress: 0, status: 'not-started', enrolledAt: now,completedItems:[] }] }
         : s
     ))
     showToast(`${selected.length} student(s) assigned to "${course.title}".`)
@@ -109,7 +111,7 @@ export default function AssignStudents() {
               <div className="p-6 text-center text-sm" style={{ color: '#334155' }}>No enrolled students yet.</div>
             ) : (
               assigned.map(student => {
-                const enroll = student.enrolledCourses.find(e => e.course.id === course.id)
+                const enroll = student.enrolledCourses.find(e => e.course === course.code)
                 return (
                   <div key={student.id} className="flex items-center gap-3 px-4 py-3" style={{ borderBottom: '1px solid #1a2540' }}>
                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"

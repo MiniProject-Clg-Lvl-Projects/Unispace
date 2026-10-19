@@ -11,20 +11,24 @@ export default function GlobalCourses() {
   if(!currentUser) return;
   const USER_ID = currentUser.id 
 
+  const [activeTab, setActiveTab] = useState<'global' | 'institute'>('global')
+  const [enrolling, setEnrolling] = useState<string | null>(null)
+  const [myEnrolled,setMyEnrolled] = useState<IEnrolledCourse[]>();
+
   const [me,setMe] = useState<IStudent>();
   useEffect(()=>{
       if(currentUser.role === 'student'){
         getStudentDetail(USER_ID)
+        
         .then((data)=>{
             setMe(data);
+            setMyEnrolled(data.enrolledCourses);
         }).catch((err)=>console.error('Failed to fetch student in AppContext:', err))
       }
 
   },[])
 
-  const [activeTab, setActiveTab] = useState<'global' | 'institute'>('global')
-  const [enrolling, setEnrolling] = useState<string | null>(null)
-  const [myEnrolled,setMyEnrolled] = useState<IEnrolledCourse[]>();
+
   
   const available = courses.filter(c => c.approvalStatus === 'approved')
 
@@ -36,10 +40,11 @@ const enroll = (courseId: string, courseTitle: string) => {
     if (!course) return;
 
   const enrolledCourse : IEnrolledCourse =                   { 
-                    course: course, 
+                    course: course.code, 
                     progress: 0,          
                     status: 'not-started',             
-                    enrolledAt: now 
+                    enrolledAt: now,
+                    completedItems: []
                   };
     // Check if course is already exists
     enrollCourse(USER_ID, enrolledCourse)
@@ -107,13 +112,7 @@ const enroll = (courseId: string, courseTitle: string) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {available.map(course => {
-          const isEnrolled = myEnrolled?.find(item=>{
-            const enrolledId = typeof item.course === 'string' 
-            ? item.course 
-            : (item.course.id);
-            return enrolledId === course.id;
-
-            })!== undefined;
+          const isEnrolled = myEnrolled?.some(item => item.course === course.code);
           const color = categoryColors[course.category] ?? '#7c3aed'
 
           return (

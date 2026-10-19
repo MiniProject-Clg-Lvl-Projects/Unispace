@@ -5,7 +5,8 @@ import type { ICourse } from '../../types'
 import { createCourse} from '../../services/courseService.tsx'
 
 export default function CreateCourse() {
-  const { courses, setCourses, navigate, showToast } = useApp()
+  const { currentUser, courses, setCourses, navigate, showToast } = useApp()
+  if(!currentUser) return;
   const [form, setForm] = useState({
     title: '', code: '', description: '', category: 'Computer Science',
     level: 'intermediate' as const, syllabus: '', experiments: '',
@@ -20,8 +21,8 @@ export default function CreateCourse() {
       title: form.title,
       code: form.code,
       description: form.description,
-      faculty: 'Dr. Rajesh Kumar',
-      facultyId: 'f1',
+      faculty: currentUser.name,
+      facultyId: currentUser.id,
       category: form.category,
       level: form.level,
       Learning: 'not-started',

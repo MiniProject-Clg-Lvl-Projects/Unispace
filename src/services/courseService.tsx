@@ -1,6 +1,7 @@
 
 import { promises } from 'dns'
 import type { ICourse, IEnrolledCourse, IUnit } from '../types.ts'
+import { json } from 'stream/consumers'
 
 export const getCourses = async (): Promise<ICourse[]> => {
   const response = await fetch('http://localhost:3000/api/FetchCourses') //replace this with proper server address
@@ -38,9 +39,70 @@ export async function getStudentEnrolledCourses(id:string) {
     throw new Error(`Failed to fetch enrolled courses: ${response.status}`)
   }
 
-    return response.json();
+  return response.json();
 
 }
+
+
+export async function updateLearningStatus(courseCode: string,studentId: string,status:string){
+  const response = await fetch(`http://localhost:3000/api/UpdateLearningStatus/${encodeURIComponent(courseCode)}`,
+    {
+      method: 'PATCH',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({studentId:studentId,status:status})
+
+    }
+  )
+
+    if (!response.ok) {
+    const error = await response.text()
+    console.error('API error:', response.status, error)
+    throw new Error(`Failed to Update status of the courses: ${response.status}`)
+  }
+
+  return response.json();
+}
+
+export async function updateLearningProgress(courseCode: string,studentId: string,progress:Number,itemId: string){
+  const response = await fetch(`http://localhost:3000/api/UpdateLearningProgress/${encodeURIComponent(courseCode)}`,
+    {
+      method: 'PATCH',
+      headers: {
+      'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({studentId:studentId,progress : progress,itemId : itemId})
+
+    }
+  )
+
+    if (!response.ok) {
+    const error = await response.text()
+    console.error('API error:', response.status, error)
+    throw new Error(`Failed to Update progress of the courses: ${response.status}`)
+  }
+
+  return response.json();
+}
+
+export async function fetchCompletedItemIds(courseCode:string,studentId: string){
+
+    
+    const response = await fetch(
+      `http://localhost:3000/api/FetchCompletedItemIds/${encodeURIComponent(courseCode)}?studentId=${encodeURIComponent(studentId)}`, 
+      {method: 'GET'}
+    );
+    if (!response.ok) {
+    throw new Error('Failed to fetch completed items');
+    }
+
+  const data = await response.json();
+  console.log(data);
+  return data;
+}
+
+
 
 export async function getFacultyEnrolledCourses(id:string) : Promise<IEnrolledCourse[]>{
   const response = await fetch(`http://localhost:3000/api/FetchFacultyEnrolledCourses/${encodeURIComponent(id)}`,{

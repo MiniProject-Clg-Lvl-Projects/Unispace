@@ -14,23 +14,24 @@ export default function StudentDashboard() {
   const USER_ID = currentUser.id 
 
   const [me,setMe] = useState<IStudent>();
-   useEffect(()=>{
-       if(currentUser.role === 'student'){
-         getStudentDetail(USER_ID)
-         .then((data)=>{
-             setMe(data);
-         }).catch((err)=>console.error('Failed to fetch student in AppContext:', err))
-       }
-  
-   },[])
+  useEffect(()=>{
+      if(currentUser.role === 'student'){
+        getStudentDetail(USER_ID)
+        .then((data)=>{
+            setMe(data);
+        }).catch((err)=>console.error('Failed to fetch student in AppContext:', err))
+      }
+
+  },[])
+
   const total = me?.enrolledCourses.length ?? 0
   const completed = me?.enrolledCourses.filter(e => e.status === 'completed').length ?? 0
   const inProgress = me?.enrolledCourses.filter(e => e.status === 'in-progress').length ?? 0
   const notStarted = me?.enrolledCourses.filter(e => e.status === 'not-started').length ?? 0
 
-  const recentCourses = me?.enrolledCourses.slice(0, 3).map(e => ({ ...e, course: courses.find(c => c.id === e.course.id) })).filter(e => e.course) ?? []
+  const recentCourses = me?.enrolledCourses.slice(0, 3).map(e => ({ ...e, course: courses.find(c => c.code === e.course) })).filter(e => e.course && e.status==='in-progress' ) ?? []
 
-  const available = courses.filter(c => c.approvalStatus === 'approved' && !me?.enrolledCourses.find(e => e.course.id === c.id)).slice(0, 3)
+  const available = courses.filter(c => c.approvalStatus === 'approved' && !me?.enrolledCourses.find(e => e.course === c.code )).slice(0, 3)
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">

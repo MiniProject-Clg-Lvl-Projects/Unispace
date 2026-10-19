@@ -25,7 +25,8 @@ export default function SearchCourse() {
         if(currentUser.role === 'student'){
           getStudentDetail(USER_ID)
           .then((data)=>{
-              setMe(data);
+            setMyEnrolled(prev => [...(prev || []),...data.enrolledCourses])
+            setMe(data);
           }).catch((err)=>console.error('Failed to fetch student in AppContext:', err))
         }
   
@@ -51,10 +52,11 @@ const enroll = (courseId: string, courseTitle: string) => {
     if (!course) return;
     
       const enrolledCourse : IEnrolledCourse =                   { 
-                        course: course, 
+                        course: course.code, 
                         progress: 0,          
                         status: 'not-started',             
-                        enrolledAt: now 
+                        enrolledAt: now,
+                        completedItems:[]
                       };
     // check if course already exists 
     enrollCourse(USER_ID, enrolledCourse)
@@ -163,13 +165,9 @@ const enroll = (courseId: string, courseTitle: string) => {
           </p>
           <div className="space-y-3">
             {results.map(course => {
-              const isEnrolled = myEnrolled?.find(item=>{
-                const enrolledId = typeof item.course === 'string' 
-                ? item.course 
-                : (item.course.id);
-                return enrolledId === course.id;
 
-                })!== undefined;
+              const isEnrolled = myEnrolled?.some(item => item.course === course.code);
+
               return (
                 <div key={course.id} className="rounded-xl p-5 flex items-start gap-5 transition-colors"
                   style={{ background: '#111827', border: '1px solid #1a2540' }}>

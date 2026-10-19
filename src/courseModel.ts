@@ -56,7 +56,7 @@ const courseSchema = new Schema<ICourse>({
 
 const enrolledCourseSchema = new Schema({
     course: { 
-        type: courseSchema, 
+        type: String, 
         ref: 'Course', 
         required: true 
     },
@@ -68,6 +68,7 @@ const enrolledCourseSchema = new Schema({
         default: 'not-started', 
         required: true 
     },
+    completedItems: { type: [String], default: [] },
     enrolledAt: { type: String, required: true },
     completedAt: { type: String }
 });

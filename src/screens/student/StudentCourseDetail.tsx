@@ -3,25 +3,50 @@
 // but it should display detailed information about a specific course, 
 // including its content, progress, and any relevant actions (like starting or continuing the course).
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import {useApp} from '../../context'
 import type { ICourse, IContentItem } from '../../types'
+import {updateLearningProgress,fetchCompletedItemIds,updateLearningStatus} from '../../services/courseService'
+
+
 
 export default function StudentCourseDetail({
-  course,
+  course
 }: {
   course: ICourse
-  content: IContentItem | undefined
 }) {
+  const {currentUser}= useApp();
+  if(!currentUser) return;
+
   const [expandedUnits, setExpandedUnits] = useState<string[]>([])
   const [selectedItem, setSelectedItem] = useState<IContentItem | null>(null)
+  const [completedIds, setCompletedIds] = useState<string[]>([]);
 
   const toggleUnit = (unitId: string) => {
+
     setExpandedUnits(prev =>
       prev.includes(unitId)
         ? prev.filter(id => id !== unitId)
         : [...prev, unitId]
     )
   }
+
+  useEffect(() => {
+      const loadProgress = async () => {
+        try {
+          const data = await fetchCompletedItemIds(course.code, currentUser.id);
+          if (data && data.completedItems) {
+            setCompletedIds(data.completedItems);
+          }
+        } catch (error) {
+          console.error("Error fetching completed items:", error);
+        }
+      };    
+
+      loadProgress();
+  }, [course.code,currentUser.id]);
+  
+
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -100,30 +125,88 @@ export default function StudentCourseDetail({
 
               {/* Unit content */}
               {isExpanded && (
-                <div className="space-y-3 border-t border-slate-700 p-4">
-                  {unit.content.map(item => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setSelectedItem(item)}
-                      className={`block w-full rounded-lg border p-4 text-left transition ${
-                        selectedItem?.id === item.id
-                          ? 'border-indigo-500 bg-indigo-500/10'
-                          : 'border-slate-700 bg-slate-800 hover:border-slate-500'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <h4 className="font-medium text-white">
-                          {item.title}
-                        </h4>
+                  <div className="space-y-3 border-t border-slate-700 p-4">
+                    {unit.content.map(item => {
+                      const isSelected = selectedItem?.id === item.id;
+                      const isCompleted = completedIds.includes(String(item.id));
 
-                        <span className="shrink-0 rounded bg-slate-700 px-2 py-1 text-xs uppercase text-slate-300">
-                          {item.type}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                      return (
+                        <div
+                          key={item.id}
+                          className={`rounded-lg border p-4 transition ${
+                            isSelected
+                              ? 'border-indigo-500 bg-indigo-500/10'
+                              : 'border-slate-700 bg-slate-800'
+                          }`}
+                        >
+                          {/* Top Row: Title, Type Badge, and View/Select Button */}
+                          <div className="flex items-center justify-between gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedItem(item)}
+                              className="text-left flex-1 focus:outline-none"
+                            >
+                              <h4 className="font-medium text-white hover:text-indigo-400 transition">
+                                {item.title}
+                              </h4>
+                            </button>
+                        
+                            <div className="flex items-center gap-2">
+                              <span className="shrink-0 rounded bg-slate-700 px-2 py-1 text-xs uppercase text-slate-300">
+                                {item.type}
+                              </span>
+                        
+                              {/* Persistent Green Checkmark if completed */}
+                              {isCompleted && (
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white text-xs">
+                                  ✓
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                            
+                          {/* Bottom Action Row: Mark as Complete / Completed status */}
+                          <div className="mt-3 flex items-center justify-between border-t border-slate-700/50 pt-3">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedItem(item)}
+                              className="text-xs text-indigo-400 hover:underline"
+                            >
+                              {isSelected ? 'Currently Viewing' : 'View Content'}
+                            </button>
+                            
+                            {!isCompleted ? (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  const updatedCompletedIds = [...completedIds, String(item.id)];
+                                  setCompletedIds(updatedCompletedIds);
+                                  
+                                  const totalContentCount = course.units.reduce((acc, unit) => acc + unit.content.length, 0);
+                                  const newPercentage = totalContentCount > 0 
+                                  ? Math.round((updatedCompletedIds.length / totalContentCount) * 100) 
+                                  : 0;
+
+                                  console.log(newPercentage);
+                                  if(newPercentage === 100){
+                                    updateLearningStatus(course.code,currentUser.id,'completed');
+                                  }
+                                  updateLearningProgress(course.code,currentUser.id,newPercentage,item.id);
+                                }}
+                                className="rounded bg-slate-700 px-3 py-1 text-xs font-medium text-slate-200 hover:bg-emerald-600 hover:text-white transition"
+                              >
+                                Mark as Complete
+                              </button>
+                            ) : (
+                              <span className="text-xs font-medium text-emerald-400 flex items-center gap-1">
+                                Completed ✓
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
               )}
             </div>
           )

@@ -3,11 +3,11 @@ import { useApp } from '../../context'
 import { Btn, StatusBadge, ProgressBar, EmptyState } from '../../components/ui'
 
 export default function CreatedCourses() {
-  const { courses, navigate } = useApp()
+  const {currentUser, courses, navigate } = useApp()
   const [search, setSearch] = useState('')
 
   const myCourses = courses.filter(c =>
-    c.facultyId === 'f1' &&
+    c.facultyId === currentUser?.id &&
     (c.title.toLowerCase().includes(search.toLowerCase()) || c.code.toLowerCase().includes(search.toLowerCase()))
   )
 
