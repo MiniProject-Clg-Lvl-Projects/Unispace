@@ -4,7 +4,7 @@ import Header from './components/Header'
 import Landing from './screens/Landing'
 import Login from './screens/Login'
 import FacultyDashboard from './screens/faculty/FacultyDashboard'
-import FacultyMyLearning from './screens/faculty/FacultyMyLearning'
+// import FacultyMyLearning from './screens/faculty/FacultyMyLearning'
 import CourseApproval from './screens/faculty/CourseApproval'
 import CreatedCourses from './screens/faculty/CreatedCourses'
 import CreateCourse from './screens/faculty/CreateCourse'
@@ -42,8 +42,8 @@ const {
       case 'login': return <Login />
       case 'register': return <Login />
       case 'faculty-dashboard': return <FacultyDashboard />
-      case 'faculty-my-learning': return <FacultyMyLearning />
-      case 'faculty-course-approval': return <CourseApproval />
+      // case 'faculty-my-learning': return <FacultyMyLearning />
+      // case 'faculty-course-approval': return <CourseApproval />
       case 'faculty-created-courses': return <CreatedCourses />
       case 'faculty-create-course': return <CreateCourse />
       case 'faculty-course-grid': return <CourseGrid />
@@ -63,9 +63,8 @@ const {
       case 'student-inprogress-courses': return <StudentMyLearning />
       case 'student-notstarted-courses': return <StudentMyLearning />
       case 'student-course-detail': 
-        console.log('Selected course:', selectedCourse)
-        console.log('Selected content:', selectedContent)
-      return selectedCourse ?  (<StudentCourseDetail course={selectedCourse} content={selectedContent} />) : (<Landing />)
+
+      return selectedCourse ?  (<StudentCourseDetail course={selectedCourse} />) : (<Landing />)
       default: return <Landing />
     }
   }

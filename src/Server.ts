@@ -4,6 +4,7 @@ import { connectDB } from './DBConnection.ts';
 import { CourseSchema,StudentSchema,FacultySchema, UserSchema} from './courseModel.ts';
 import type { ICourse, IStudent, IFaculty, ILogin,IUnit,IEnrolledCourse} from './types.ts';
 import bcrypt from 'bcrypt';
+import { resourceUsage } from 'process';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -115,6 +116,7 @@ app.patch('/api/courses/:CourseCode/units',async (req,res)=>{
 
 });
 
+
 app.get('/api/FectchStundentDetail/:studentID',async (req,res)=>{
     const {studentID} = req.params;
     try{
@@ -131,13 +133,96 @@ app.get('/api/FectchStundentDetail/:studentID',async (req,res)=>{
 
 app.get('/api/FetchCourses', async (req, res) => {
   try {
-
     const courses = await CourseSchema.find();
     res.json(courses);
   }catch (error) {
     console.error('Error fetching courses:', error);
     res.status(500).json({ message: 'Internal server error' });
   }
+});
+
+app.patch('/api/UpdateLearningStatus/:courseCode',async (req,res)=>{  
+  const {courseCode} = req.params;
+  const {studentId,status} = req.body;
+  try{
+      const updatedStudent = await StudentSchema.updateOne(
+        {studentId: studentId,
+          "enrolledCourses.course" : courseCode
+        },
+        {$set: {
+          "enrolledCourses.$.status" :status
+        }}
+      );
+
+    if(updatedStudent.matchedCount === 0){
+      return res.status(404).json({ message: 'couldnt update the status' });
+    }
+
+    if (!updatedStudent) {
+      return res.status(404).json({
+          message: 'student not found'
+      });
+    }
+
+  }catch(error){
+      return res.status(500).json({
+            message: 'Failed to Upodate status' + error
+      });
+  }
+
+
+});
+
+app.patch('/api/UpdateLearningProgress/:courseCode',async (req,res)=>{
+  const {courseCode} = req.params;
+  const {studentId,progress,itemId} = req.body;
+  try{
+    const updatedStudent = await StudentSchema.updateOne(
+      {studentId: studentId,
+        "enrolledCourses.course" : courseCode
+      },{
+        $set:{
+          "enrolledCourses.$.progress" : progress
+        },
+        $addToSet:{
+          "enrolledCourses.$.completedItems": itemId
+        }
+      }
+    )
+
+    if(updatedStudent.matchedCount === 0){
+      return res.status(404).json({ message: 'couldnt update the progress' });
+    }
+
+    if (!updatedStudent) {
+      return res.status(404).json({
+          message: 'student not found'
+      });
+    }
+
+  }catch(error){
+      return res.status(500).json({
+            message: 'Failed to Update progress' + error
+      });
+  }
+
+
+});
+
+app.get('/api/FetchCompletedItemIds/:courseCode',async (req,res)=>{
+  const {courseCode} = req.params;
+  const studentId = req.query.studentId as string;
+  try{
+    const FetchedStudent = await StudentSchema.findOne({ studentId: studentId });
+    const enrollment = FetchedStudent?.enrolledCourses.find(e => e.course === courseCode);
+
+    res.status(200).json({ completedItems: enrollment?.completedItems || [] });
+  }catch(error){
+      return res.status(500).json({
+            message: 'Failed to fetch items' + error
+      });
+  }
+
 });
 
 app.get('/api/FetchCourse/:CourseID', async (req, res) => {
