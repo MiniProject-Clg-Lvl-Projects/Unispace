@@ -1,31 +1,87 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useApp } from '../../context'
 import { Btn, Badge, StatusBadge } from '../../components/ui'
-
-const STUDENT_ID = 'st1'
+import {enrollCourse} from '../../services/courseService'
+import {getStudentDetail} from '../../services/LoginServices'
+import { IEnrolledCourse, IStudent } from '@/types'
 
 export default function GlobalCourses() {
-  const { courses, students, setCourses, setStudents, navigate, showToast } = useApp()
+
+  const { currentUser,courses, students, setCourses, setStudents, navigate, showToast } = useApp()
+  if(!currentUser) return;
+  const USER_ID = currentUser.id 
+
   const [activeTab, setActiveTab] = useState<'global' | 'institute'>('global')
   const [enrolling, setEnrolling] = useState<string | null>(null)
+  const [myEnrolled,setMyEnrolled] = useState<IEnrolledCourse[]>();
 
-  const me = students.find(s => s.id === STUDENT_ID)
-  const myEnrolled = new Set(me?.enrolledCourses.map(e => e.courseId) ?? [])
+  const [me,setMe] = useState<IStudent>();
+  useEffect(()=>{
+      if(currentUser.role === 'student'){
+        getStudentDetail(USER_ID)
+        
+        .then((data)=>{
+            setMe(data);
+            setMyEnrolled(data.enrolledCourses);
+        }).catch((err)=>console.error('Failed to fetch student in AppContext:', err))
+      }
+
+  },[])
+
+
+  
   const available = courses.filter(c => c.approvalStatus === 'approved')
 
-  const enroll = (courseId: string, courseTitle: string) => {
+const enroll = (courseId: string, courseTitle: string) => {
     setEnrolling(courseId)
     const now = new Date().toISOString().split('T')[0]
-    setTimeout(() => {
-      setCourses(prev => prev.map(c => c.id === courseId ? { ...c, enrolledStudents: [...c.enrolledStudents, STUDENT_ID] } : c))
-      setStudents(prev => prev.map(s =>
-        s.id === STUDENT_ID
-          ? { ...s, enrolledCourses: [...s.enrolledCourses, { courseId, progress: 0, status: 'not-started', currentUnit: '', enrolledAt: now }] }
-          : s
-      ))
-      showToast(`Successfully enrolled in "${courseTitle}"!`)
-      setEnrolling(null)
-    }, 600)
+
+    const course = courses.find(c => c.id === courseId);
+    if (!course) return;
+
+  const enrolledCourse : IEnrolledCourse =                   { 
+                    course: course.code, 
+                    progress: 0,          
+                    status: 'not-started',             
+                    enrolledAt: now,
+                    completedItems: []
+                  };
+    // Check if course is already exists
+    enrollCourse(USER_ID, enrolledCourse)
+      .then(() => {
+        
+        setCourses(prev => prev.map(c => 
+          c.id === courseId 
+            ? { ...c, enrolledStudents: [...(c.enrolledStudents || []), USER_ID] } 
+            : c
+        ))
+
+        setStudents(prev => prev.map(s =>
+          s.studentId === USER_ID
+            ? { 
+                ...s, 
+                enrolledCourses: [
+                  ...(s.enrolledCourses || []), 
+                  enrolledCourse
+                ]
+              }
+            : s
+        ))
+
+        setMyEnrolled(prev => [
+          ...(prev || []),
+          enrolledCourse
+        ])
+
+        showToast(`Successfully enrolled in "${courseTitle}"!`)
+      })
+      .catch(err => {
+        console.error('Enrollment failed:', err)
+        showToast('Failed to enroll. Please try again.')
+      })
+      .finally(() => {
+        setEnrolling(null)
+      })
   }
 
   const categoryColors: Record<string, string> = {
@@ -64,7 +120,7 @@ console.log('Approved courses:', available.map(c => ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {available.map(course => {
-          const isEnrolled = myEnrolled.has(course.id)
+          const isEnrolled = myEnrolled?.some(item => item.course === course.code);
           const color = categoryColors[course.category] ?? '#7c3aed'
 
           return (
@@ -92,7 +148,7 @@ console.log('Approved courses:', available.map(c => ({
                 </div>
 
                 <div className="flex items-center gap-3 text-xs" style={{ color: '#334155' }}>
-                  <span>📦 {course.units.length} units</span>
+                <span>📦 {course.units.length} units</span>
                   <span>📝 {course.syllabus.length} topics</span>
                   <span>🔬 {course.experiments.length} labs</span>
                 </div>

@@ -2,6 +2,7 @@ export type Role = 'faculty' | 'student'
 export type CourseStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'in-progress'
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type EnrollStatus = 'not-started' | 'in-progress' | 'completed'
+export type LearningStatus = 'not-started' | 'in-progress' | 'completed'
 
 export interface IContentItem {
   id: string
@@ -39,6 +40,7 @@ export interface ICourse {
   facultyId: string
   category: string
   level: 'beginner' | 'intermediate' | 'advanced'
+  Learning : LearningStatus
   status: CourseStatus
   approvalStatus: ApprovalStatus
   units: IUnit[]
@@ -48,21 +50,44 @@ export interface ICourse {
   createdAt: string
 }
 
+export interface ILogin extends Document {
+  id: string;
+  name:string;
+  email: string;
+  passwordHash: string;
+  role: Role;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IEnrolledCourse {
-  courseId: string
-  progress: number
-  status: EnrollStatus
-  currentUnit: string
-  enrolledAt: string
-  completedAt?: string
+  course: string; 
+  progress: number;
+  status: 'not-started' | 'in-progress' | 'completed';
+  currentUnit?: string;
+  enrolledAt: string;
+  completedItems:string[]
+  completedAt?: string;
 }
 
 export interface IStudent {
   id: string
   name: string
   email: string
+  password:string 
   studentId: string
   enrolledCourses: IEnrolledCourse[]
+}
+
+export interface IFaculty  {
+  id: string
+  name: string
+  email: string
+  password:string 
+  Department: string
+  facultyId: string
+  // enrolledCourses: IEnrolledCourse[]
 }
 
 export interface IUser {
@@ -95,6 +120,7 @@ export type Screen =
   | 'student-search'
   | 'student-my-learning'
   | 'student-total-courses'
+  | 'student-course-detail'
   | 'student-completed-courses'
   | 'student-inprogress-courses'
   | 'student-notstarted-courses'

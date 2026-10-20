@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useApp } from '../../context'
 import { Btn, Input, Textarea, Select } from '../../components/ui'
 import type { ICourse } from '../../types'
+import { createCourse} from '../../services/courseService.tsx'
 
 export default function CreateCourse() {
-  const { courses, setCourses, navigate, showToast } = useApp()
+  const { currentUser, courses, setCourses, navigate, showToast } = useApp()
+  if(!currentUser) return;
   const [form, setForm] = useState({
     title: '', code: '', description: '', category: 'Computer Science',
     level: 'intermediate' as const, syllabus: '', experiments: '',
@@ -19,15 +21,16 @@ export default function CreateCourse() {
       title: form.title,
       code: form.code,
       description: form.description,
-      faculty: 'Dr. Rajesh Kumar',
-      facultyId: 'f1',
+      faculty: currentUser.name,
+      facultyId: currentUser.id,
       category: form.category,
       level: form.level,
+      Learning: 'not-started',
       status: 'draft',
       approvalStatus: 'pending',
       units: [],
       syllabus: form.syllabus.split('\n').filter(Boolean).map((t, i) => ({
-        id: `s_new_${i}`, topic: t.trim(), hours: 4, description: ''
+        id: `s_new_${i}`, topic: t.trim(), hours: 4, description: '' // Replace the numebr of hours here
       })),
       experiments: form.experiments.split('\n').filter(Boolean).map((t, i) => ({
         id: `e_new_${i}`, title: t.trim(), description: '', materials: ''
@@ -35,12 +38,16 @@ export default function CreateCourse() {
       enrolledStudents: [],
       createdAt: new Date().toISOString().split('T')[0],
     }
+    createCourse(newCourse).catch(err => console.error(`Failed to create course ${newCourse.title}:`, err))
+
     setCourses(prev => [...prev, newCourse])
     showToast(`"${form.title}" created successfully!`)
     navigate('faculty-course-info', { course: newCourse })
   }
 
+  //FORM for creating the Course
   return (
+
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>Create New Course</h1>

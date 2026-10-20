@@ -4,7 +4,7 @@ import Header from './components/Header'
 import Landing from './screens/Landing'
 import Login from './screens/Login'
 import FacultyDashboard from './screens/faculty/FacultyDashboard'
-import FacultyMyLearning from './screens/faculty/FacultyMyLearning'
+// import FacultyMyLearning from './screens/faculty/FacultyMyLearning'
 import CourseApproval from './screens/faculty/CourseApproval'
 import CreatedCourses from './screens/faculty/CreatedCourses'
 import CreateCourse from './screens/faculty/CreateCourse'
@@ -20,11 +20,19 @@ import StudentDashboard from './screens/student/StudentDashboard'
 import GlobalCourses from './screens/student/GlobalCourses'
 import SearchCourse from './screens/student/SearchCourse'
 import StudentMyLearning from './screens/student/StudentMyLearning'
+import StudentCourseDetail from './screens/student/StudentCourseDetail'
+
 
 const AUTH_SCREENS = new Set(['landing', 'login', 'register'])
 
 function AppShell() {
-  const { currentScreen, toast, toastType } = useApp()
+const {
+  currentScreen,
+  toast,
+  toastType,
+  selectedCourse,
+  selectedContent
+} = useApp()
 
   const isAuth = AUTH_SCREENS.has(currentScreen)
 
@@ -34,8 +42,8 @@ function AppShell() {
       case 'login': return <Login />
       case 'register': return <Login />
       case 'faculty-dashboard': return <FacultyDashboard />
-      case 'faculty-my-learning': return <FacultyMyLearning />
-      case 'faculty-course-approval': return <CourseApproval />
+      // case 'faculty-my-learning': return <FacultyMyLearning />
+      // case 'faculty-course-approval': return <CourseApproval />
       case 'faculty-created-courses': return <CreatedCourses />
       case 'faculty-create-course': return <CreateCourse />
       case 'faculty-course-grid': return <CourseGrid />
@@ -54,6 +62,9 @@ function AppShell() {
       case 'student-completed-courses': return <StudentMyLearning />
       case 'student-inprogress-courses': return <StudentMyLearning />
       case 'student-notstarted-courses': return <StudentMyLearning />
+      case 'student-course-detail': 
+
+      return selectedCourse ?  (<StudentCourseDetail course={selectedCourse} />) : (<Landing />)
       default: return <Landing />
     }
   }
@@ -98,6 +109,7 @@ function AppShell() {
     </div>
   )
 }
+
 
 export default function App() {
   return (

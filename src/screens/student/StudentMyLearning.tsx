@@ -1,13 +1,31 @@
 import { useApp } from '../../context'
+import { useState,useEffect } from 'react'
 import { Btn, StatCard, ProgressBar, EmptyState, StatusBadge } from '../../components/ui'
 import type { Screen } from '../../types'
+import {updateLearningStatus} from '../../services/courseService'
+import { ICourse, IEnrolledCourse, IStudent } from '@/types'
+import {getStudentDetail} from '../../services/LoginServices'
 
-const STUDENT_ID = 'st1'
+
+
 
 export default function StudentMyLearning() {
-  const { students, courses, navigate, currentScreen, screenFilter } = useApp()
+  const {currentUser, students, courses, navigate,selectedContent,selectedCourse, currentScreen, screenFilter } = useApp()
+  if(!currentUser) return;
+  const USER_ID = currentUser.id 
 
-  const me = students.find(s => s.id === STUDENT_ID)
+  const [me,setMe] = useState<IStudent>();
+    useEffect(()=>{
+        if(currentUser.role === 'student'){
+          getStudentDetail(USER_ID)
+          .then((data)=>{
+              setMe(data);
+          }).catch((err)=>console.error('Failed to fetch student in AppContext:', err))
+        }
+  
+    },[])
+
+
   const total = me?.enrolledCourses ?? []
   const completed = total.filter(e => e.status === 'completed')
   const inProgress = total.filter(e => e.status === 'in-progress')
@@ -79,12 +97,12 @@ export default function StudentMyLearning() {
       ) : (
         <div className={filter === 'all' || filter === 'in-progress' ? 'space-y-3' : 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4'}>
           {filtered.map(enrollment => {
-            const course = courses.find(c => c.id === enrollment.courseId)
+            const course = courses.find(c => c.code === enrollment.course)
             if (!course) return null
 
             if (filter === 'in-progress' || filter === 'all') {
               return (
-                <div key={enrollment.courseId} className="rounded-xl p-5 flex items-center gap-5 transition-colors"
+                <div key={enrollment.course} className="rounded-xl p-5 flex items-center gap-5 transition-colors"
                   style={{ background: '#111827', border: '1px solid #1a2540' }}>
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
                     style={{ background: enrollment.status === 'completed' ? 'rgba(13,148,136,0.15)' : 'rgba(124,58,237,0.15)' }}>
@@ -103,7 +121,11 @@ export default function StudentMyLearning() {
                     </div>
                   </div>
                   <div className="flex-shrink-0">
-                    <Btn size="sm" variant={enrollment.status === 'completed' ? 'secondary' : 'primary'}>
+                    <Btn size="sm" variant={enrollment.status === 'completed' ? 'secondary' : 'primary'} onClick={() =>{
+                      navigate( 'student-course-detail',{course})
+                      
+                      updateLearningStatus(course.code,USER_ID,enrollment.status)
+                    }}>
                       {enrollment.status === 'completed' ? 'Review' : enrollment.status === 'not-started' ? 'Start →' : 'Continue →'}
                     </Btn>
                   </div>
@@ -113,7 +135,7 @@ export default function StudentMyLearning() {
 
             // Card layout for completed/not-started
             return (
-              <div key={enrollment.courseId} className="rounded-xl p-5 flex flex-col gap-4"
+              <div key={enrollment.course} className="rounded-xl p-5 flex flex-col gap-4"
                 style={{ background: '#111827', border: '1px solid #1a2540' }}>
                 <div>
                   <div className="text-xs mb-1" style={{ color: '#475569', fontFamily: 'JetBrains Mono, monospace' }}>{course.code}</div>

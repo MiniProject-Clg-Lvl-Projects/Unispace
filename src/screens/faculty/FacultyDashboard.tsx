@@ -4,17 +4,20 @@ import { StatCard, Card, Btn, StatusBadge, ProgressBar } from '../../components/
 export default function FacultyDashboard() {
   const { currentUser, courses, students, navigate } = useApp()
 
-  const myCourses = courses.filter(c => c.facultyId === 'f1')
+  const USER_ID = currentUser?.id;
+
+  const myCourses = courses.filter(c => c.facultyId === USER_ID)
   const pending = courses.filter(c => c.approvalStatus === 'pending')
   const inProgress = myCourses.filter(c => c.status === 'in-progress')
   const totalLearners = new Set(myCourses.flatMap(c => c.enrolledStudents)).size
 
-  const recentActivity = [
-    { action: 'New enrollment', detail: 'Sneha Patel enrolled in DS&A', time: '2h ago', icon: '🎓' },
-    { action: 'Course approved', detail: 'Operating Systems approved by admin', time: '5h ago', icon: '✅' },
-    { action: 'Approval requested', detail: 'ML Fundamentals sent for review', time: '1d ago', icon: '📋' },
-    { action: 'Unit added', detail: 'Unit 3 added to DS&A course', time: '2d ago', icon: '📝' },
-  ]
+  
+  // const recentActivity = [
+  //   { action: 'New enrollment', detail: 'Sneha Patel enrolled in DS&A', time: '2h ago', icon: '🎓' },
+  //   { action: 'Course approved', detail: 'Operating Systems approved by admin', time: '5h ago', icon: '✅' },
+  //   { action: 'Approval requested', detail: 'ML Fundamentals sent for review', time: '1d ago', icon: '📋' },
+  //   { action: 'Unit added', detail: 'Unit 3 added to DS&A course', time: '2d ago', icon: '📝' },
+  // ]
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -32,7 +35,7 @@ export default function FacultyDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Courses" value={myCourses.length} icon="🗂" color="#7c3aed" />
-        <StatCard label="Awaiting Approval" value={pending.length} icon="⏳" color="#f59e0b" />
+        {/* <StatCard label="Awaiting Approval" value={pending.length} icon="⏳" color="#f59e0b" /> */}
         <StatCard label="In Progress" value={inProgress.length} icon="▶" color="#3b82f6" />
         <StatCard label="Total Learners" value={totalLearners} icon="👥" color="#0d9488" />
       </div>
@@ -94,6 +97,7 @@ export default function FacultyDashboard() {
           <Card>
             <h3 className="font-semibold text-white mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>Recent Activity</h3>
             <div className="space-y-3">
+              {/*
               {recentActivity.map((a, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <span className="text-base mt-0.5">{a.icon}</span>
@@ -104,6 +108,7 @@ export default function FacultyDashboard() {
                   </div>
                 </div>
               ))}
+                */}
             </div>
           </Card>
         </div>

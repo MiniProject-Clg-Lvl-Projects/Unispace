@@ -1,22 +1,32 @@
 import { useState } from 'react'
 import { useApp } from '../../context'
 import { Btn, Modal, Input, EmptyState } from '../../components/ui'
-import type { ICourse } from '../../types'
+import type { ICourse, IUnit } from '../../types'
+import {createUnit,getCourse} from'../../services/courseService'
 
 export default function CourseContent() {
-  const { selectedCourse, setCourses, navigate, showToast } = useApp()
+  const { selectedCourse, setCourses, navigate, showToast,setSelectedCourse } = useApp()
   const [showAddUnit, setShowAddUnit] = useState(false)
   const [unitTitle, setUnitTitle] = useState('')
   const [expandedUnit, setExpandedUnit] = useState<string | null>(null)
 
   if (!selectedCourse) return <EmptyState icon="📝" title="No course selected" message="Select a course first." />
 
-  const course = selectedCourse
-
-  const addUnit = () => {
+  let course = selectedCourse
+  const addUnit =async () => {
     if (!unitTitle.trim()) return
-    const newUnit = { id: `u_${Date.now()}`, title: unitTitle.trim(), content: [] }
+    const newUnit :IUnit = { id: `u_${Date.now()}`, title: unitTitle.trim(), content: [] }
+    
+    try{
+      await createUnit(newUnit,course.code);
+      const fetchedCourse = await getCourse(course.code);
+      setSelectedCourse(fetchedCourse);
+      console.log(course)
+    }catch(error){
+      console.log(error);
+    }
     setCourses(prev => prev.map(c => c.id === course.id ? { ...c, units: [...c.units, newUnit] } : c))
+    
     showToast(`Unit "${unitTitle}" added successfully.`)
     setUnitTitle('')
     setShowAddUnit(false)
@@ -93,7 +103,7 @@ export default function CourseContent() {
                       unit.content.map(item => (
                         <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors"
                           style={{ background: '#0a0f1a' }}
-                          onClick={() => navigate('faculty-document-preview', { content: item, course })}>
+                          onClick={() => navigate('faculty-document-preview', { content:item, course })}>
                           <span className="text-sm">{item.type === 'pdf' ? '📄' : item.type === 'video' ? '🎥' : '❓'}</span>
                           <span className="text-sm text-white">{item.title}</span>
                           <span className="ml-auto text-xs" style={{ color: '#475569' }}>{item.type}</span>

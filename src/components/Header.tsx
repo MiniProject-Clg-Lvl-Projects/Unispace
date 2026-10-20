@@ -26,6 +26,7 @@ const breadcrumbMap: Record<Screen, string[]> = {
   'student-completed-courses': ['Dashboard', 'My Learning', 'Completed'],
   'student-inprogress-courses': ['Dashboard', 'My Learning', 'In Progress'],
   'student-notstarted-courses': ['Dashboard', 'My Learning', 'Not Started'],
+  'student-course-detail' :['Dashboard']
 }
 
 export default function Header() {

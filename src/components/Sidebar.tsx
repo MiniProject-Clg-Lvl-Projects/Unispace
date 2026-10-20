@@ -9,8 +9,7 @@ interface NavItem {
 
 const facultyNav: NavItem[] = [
   { label: 'Dashboard', screen: 'faculty-dashboard', icon: '⊞' },
-  { label: 'My Learning', screen: 'faculty-my-learning', icon: '📖' },
-  { label: 'Course Approvals', screen: 'faculty-course-approval', icon: '✓' },
+  // { label: 'Course Approvals', screen: 'faculty-course-approval', icon: '✓' },
   { label: 'Created Courses', screen: 'faculty-created-courses', icon: '🗂' },
   { label: 'Course Grid', screen: 'faculty-course-grid', icon: '◫' },
 ]
@@ -30,9 +29,9 @@ export default function Sidebar() {
     <aside className="w-60 flex-shrink-0 flex flex-col" style={{ background: '#0a0f1a', borderRight: '1px solid #1a2540' }}>
       {/* Logo */}
       <div className="px-5 py-5 flex items-center gap-3" style={{ borderBottom: '1px solid #1a2540' }}>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c3aed, #0d9488)' }}>C</div>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c3aed, #0d9488)' }}>Uni</div>
         <div>
-          <div className="text-white font-bold text-lg tracking-wide" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.04em' }}>CAMPIZO</div>
+          <div className="text-white font-bold text-lg tracking-wide" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '0.04em' }}>UNISPACE</div>
           <div className="text-xs" style={{ color: '#475569' }}>ERP Platform</div>
         </div>
       </div>

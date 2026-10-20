@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useApp } from '../../context'
 import { Btn, Modal, Input, Textarea, StatusBadge, ProgressBar, EmptyState } from '../../components/ui'
 import type { ICourse } from '../../types'
+import {createUnit} from '../../services/courseService'
 
 export default function SelectedCourse() {
   const { selectedCourse, setCourses, navigate, showToast } = useApp()
@@ -24,6 +25,7 @@ export default function SelectedCourse() {
     if (!unitTitle.trim()) return
     const newUnit = { id: `u_${Date.now()}`, title: unitTitle.trim(), content: [] }
     setCourses(prev => prev.map(c => c.id === course.id ? { ...c, units: [...c.units, newUnit] } : c))
+    createUnit(newUnit,course.code);
     showToast(`Unit "${unitTitle}" added.`)
     setUnitTitle(''); setShowAddUnit(false)
   }
