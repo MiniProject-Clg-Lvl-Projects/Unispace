@@ -48,13 +48,37 @@ const courseSchema = new Schema<ICourse>({
   category: { type: String, required: true },
   level: { type: String, required: true },
   status: { type: String, required: true },
-approvalStatus: {
-  type: String,
-  enum: ['pending', 'approved', 'rejected'],
-  default: 'pending',
-  required: true
-},
-units: [unitSchema]
+  units: [unitSchema],
+  syllabus:  [syllabusItemSchma],
+  experiments: [experimentSchma],
+  enrolledStudents:[String],
+  approvalStatus: { type: String, required: true },
+});
+
+const enrolledCourseSchema = new Schema({
+    course: { 
+        type: String, 
+        ref: 'Course', 
+        required: true 
+    },
+    
+    progress: { type: Number, default: 0 },
+    status: { 
+        type: String, 
+        enum: ['not-started', 'in-progress', 'completed'], 
+        default: 'not-started', 
+        required: true 
+    },
+    completedItems: { type: [String], default: [] },
+    enrolledAt: { type: String, required: true },
+    completedAt: { type: String }
+});
+
+const facultySchema = new Schema<IFaculty >({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  facultyId : { type: String, required: true },
+  // Department: { type: String, required: true }
 });
 
 const studentSchema = new Schema<IStudent>({

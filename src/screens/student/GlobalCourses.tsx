@@ -32,7 +32,7 @@ export default function GlobalCourses() {
   
   const available = courses.filter(c => c.approvalStatus === 'approved')
 
-const enroll = (courseId: string, courseTitle: string) => {
+  const enroll = (courseId: string, courseTitle: string) => {
     setEnrolling(courseId)
     const now = new Date().toISOString().split('T')[0]
 
@@ -92,14 +92,16 @@ const enroll = (courseId: string, courseTitle: string) => {
     'Cybersecurity': '#ef4444',
     'Mathematics': '#8b5cf6',
   }
-console.log('Available courses:', available)
-console.log('All courses from context:', courses)
-console.log('Number of available courses:', available.length)
-console.log('Total courses from API/context:', courses.length)
-console.log('Approved courses:', available.map(c => ({
-  title: c.title,
-  approvalStatus: c.approvalStatus
-})))
+
+  console.log('Available courses:', available)
+  console.log('All courses from context:', courses)
+  console.log('Number of available courses:', available.length)
+  console.log('Total courses from API/context:', courses.length)
+  console.log('Approved courses:', available.map(c => ({
+    title: c.title,
+    approvalStatus: c.approvalStatus
+  })))
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>

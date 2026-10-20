@@ -9,19 +9,11 @@ export default function CourseApproval() {
 
   const filtered = courses.filter(c => filter === 'all' || c.approvalStatus === filter)
 
-  // const approve = (course: ICourse) => {
-  //   setCourses(prev => prev.map(c => c.id === course.id ? { ...c, approvalStatus: 'approved', status: 'approved' } : c))
-  //   showToast(`"${course.title}" approved successfully.`)
-  // }
-
-  // const reject = (course: ICourse) => {
-  //   setCourses(prev => prev.map(c => c.id === course.id ? { ...c, approvalStatus: 'rejected', status: 'rejected' } : c))
-  //   showToast(`"${course.title}" rejected.`, 'error')
-  // }
-   const updateApproval = async (
+  const updateApproval = async (
   course: ICourse,
   approvalStatus: 'approved' | 'rejected'
-) => {
+  ) => {
+
   try {
     const response = await fetch(
       `http://localhost:3000/api/courses/${encodeURIComponent(course.id)}/approval`,
@@ -33,13 +25,10 @@ export default function CourseApproval() {
         body: JSON.stringify({ approvalStatus })
       }
     );
-
     const data = await response.json();
-
-    if (!response.ok) {
+      if (!response.ok) {
       throw new Error(data.message || 'Update failed');
     }
-
     setCourses(prev =>
       prev.map(c =>
         c.id === course.id
@@ -57,13 +46,19 @@ export default function CourseApproval() {
     console.error('Approval update failed:', error);
     showToast('Could not update approval. Please try again.', 'error');
   }
+  };
+
+  const approve = (course: ICourse) =>{
+    updateApproval(course, 'approved');
+  }
 };
 
 const approve = (course: ICourse) =>
   updateApproval(course, 'approved');
 
-const reject = (course: ICourse) =>
-  updateApproval(course, 'rejected');
+  const reject = (course: ICourse) =>
+    updateApproval(course, 'rejected');
+
   const tabs = [
     { key: 'all' as const, label: 'All Courses', count: courses.length },
     { key: 'pending' as const, label: 'Pending', count: courses.filter(c => c.approvalStatus === 'pending').length },
