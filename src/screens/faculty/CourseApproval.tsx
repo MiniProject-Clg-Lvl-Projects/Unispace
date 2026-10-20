@@ -51,6 +51,10 @@ export default function CourseApproval() {
   const approve = (course: ICourse) =>{
     updateApproval(course, 'approved');
   }
+};
+
+const approve = (course: ICourse) =>
+  updateApproval(course, 'approved');
 
   const reject = (course: ICourse) =>
     updateApproval(course, 'rejected');
