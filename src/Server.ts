@@ -403,7 +403,6 @@ app.post('/api/FetchStudent/:studentEmailId', async (req, res) => {
   }
 });
 
-
 app.post('/api/FetchFaculty/:facultyEmailId', async (req, res) => {
    console.log('FetchFaculty route reached!');
   const { facultyEmailId  } = req.params;
@@ -444,6 +443,45 @@ app.post('/api/FetchFaculty/:facultyEmailId', async (req, res) => {
   }
 });
 
+
+app.patch('/api/courses/:id/approval', async (req, res) => {
+  try {
+    const { approvalStatus } = req.body;
+    if (!['approved', 'rejected', 'pending'].includes(approvalStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid approval status'
+      });
+    }
+
+    const course = await CourseSchema.findOneAndUpdate(
+      { id: req.params.id }, 
+      {
+        $set: {
+          "approvalStatus":approvalStatus,
+          "status": approvalStatus
+        }
+      },
+      { returnDocument: 'after', runValidators: true }
+    );
+
+
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    res.json({ success: true, course: course });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update course approval'
+    });
+  }
+});
 
 
 app.listen(PORT, () => {

@@ -7,7 +7,7 @@ export default function FacultyDashboard() {
   const USER_ID = currentUser?.id;
 
   const myCourses = courses.filter(c => c.facultyId === USER_ID)
-  const pending = courses.filter(c => c.approvalStatus === 'pending')
+  const pending = myCourses.filter(c => c.approvalStatus === 'pending')
   const inProgress = myCourses.filter(c => c.status === 'in-progress')
   const totalLearners = new Set(myCourses.flatMap(c => c.enrolledStudents)).size
 
@@ -35,7 +35,7 @@ export default function FacultyDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Courses" value={myCourses.length} icon="🗂" color="#7c3aed" />
-        {/* <StatCard label="Awaiting Approval" value={pending.length} icon="⏳" color="#f59e0b" /> */}
+        <StatCard label="Awaiting Approval" value={pending.length} icon="⏳" color="#f59e0b" />
         <StatCard label="In Progress" value={inProgress.length} icon="▶" color="#3b82f6" />
         <StatCard label="Total Learners" value={totalLearners} icon="👥" color="#0d9488" />
       </div>

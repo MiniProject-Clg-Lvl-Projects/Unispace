@@ -52,6 +52,7 @@ const courseSchema = new Schema<ICourse>({
   syllabus:  [syllabusItemSchma],
   experiments: [experimentSchma],
   enrolledStudents:[String],
+  approvalStatus: { type: String, required: true },
 });
 
 const enrolledCourseSchema = new Schema({

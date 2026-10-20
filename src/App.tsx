@@ -43,7 +43,7 @@ const {
       case 'register': return <Login />
       case 'faculty-dashboard': return <FacultyDashboard />
       // case 'faculty-my-learning': return <FacultyMyLearning />
-      // case 'faculty-course-approval': return <CourseApproval />
+      case 'faculty-course-approval': return <CourseApproval />
       case 'faculty-created-courses': return <CreatedCourses />
       case 'faculty-create-course': return <CreateCourse />
       case 'faculty-course-grid': return <CourseGrid />

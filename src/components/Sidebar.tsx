@@ -9,7 +9,7 @@ interface NavItem {
 
 const facultyNav: NavItem[] = [
   { label: 'Dashboard', screen: 'faculty-dashboard', icon: '⊞' },
-  // { label: 'Course Approvals', screen: 'faculty-course-approval', icon: '✓' },
+  { label: 'Course Approvals', screen: 'faculty-course-approval', icon: '✓' },
   { label: 'Created Courses', screen: 'faculty-created-courses', icon: '🗂' },
   { label: 'Course Grid', screen: 'faculty-course-grid', icon: '◫' },
 ]
