@@ -2,9 +2,10 @@ import { useState,useEffect } from 'react'
 import { useApp } from '../../context'
 import { Btn, Badge, StatusBadge } from '../../components/ui'
 import { match } from 'node:assert/strict'
-import {enrollCourse} from '../../services/courseService'
+import {enrollCourse,getCourses} from '../../services/courseService'
 import { IEnrolledCourse, IStudent } from '@/types'
 import {getStudentDetail} from '../../services/LoginServices'
+import { error } from 'node:console'
 
 
 export default function SearchCourse() {
@@ -21,16 +22,19 @@ export default function SearchCourse() {
   const USER_ID = currentUser.id 
   
    const [me,setMe] = useState<IStudent>();
-    useEffect(()=>{
-        if(currentUser.role === 'student'){
-          getStudentDetail(USER_ID)
-          .then((data)=>{
-            setMyEnrolled(prev => [...(prev || []),...data.enrolledCourses])
-            setMe(data);
-          }).catch((err)=>console.error('Failed to fetch student in AppContext:', err))
-        }
-  
-    },[])
+  useEffect(()=>{
+      if(currentUser.role === 'student'){
+        getStudentDetail(USER_ID)
+        .then((data)=>{
+          setMyEnrolled(prev => [...(prev || []),...data.enrolledCourses])
+          setMe(data);
+        }).catch((err)=>console.error('Failed to fetch student in AppContext:', err))
+      }
+
+  },[])
+
+
+
   const categories = ['All', ...Array.from(new Set(courses.map(c => c.category)))]
   const levels = ['All', 'beginner', 'intermediate', 'advanced']
 
@@ -39,12 +43,13 @@ export default function SearchCourse() {
     const matchQ = !query || c.title.toLowerCase().includes(query.toLowerCase()) || c.code.toLowerCase().includes(query.toLowerCase()) || c.faculty.toLowerCase().includes(query.toLowerCase())
     const matchCat = catFilter === 'All' || c.category === catFilter
     const matchLevel = levelFilter === 'All' || c.level === levelFilter
-    return matchQ && matchCat && matchLevel
+    const matchapproved =  c.approvalStatus ==='approved';
+    return matchQ && matchCat && matchLevel && matchapproved
   })
 
   const doSearch = () => { setSearched(true) }
 
-const enroll = (courseId: string, courseTitle: string) => {
+  const enroll = (courseId: string, courseTitle: string) => {
     setEnrolling(courseId)
     const now = new Date().toISOString().split('T')[0]
 
@@ -95,6 +100,18 @@ const enroll = (courseId: string, courseTitle: string) => {
         setEnrolling(null)
       })
   }
+
+  // useEffect(()=>{
+  //    getCourses()
+  //    .then( (course)=>{
+  //       setCourses(course);
+  //     })
+  //     .catch(err=>{
+  //       console.error('Enrollment failed:', err)
+  //       showToast('Failed to update courses list. Please try again.')
+  //     })
+    
+  // },[courses]);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">

@@ -64,7 +64,7 @@ const {
       case 'student-notstarted-courses': return <StudentMyLearning />
       case 'student-course-detail': 
 
-      return selectedCourse ?  (<StudentCourseDetail course={selectedCourse} />) : (<Landing />)
+      return selectedCourse ?  (<StudentCourseDetail selectedcourse={selectedCourse} />) : (<Landing />)
       default: return <Landing />
     }
   }

@@ -3,11 +3,11 @@ export type CourseStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'in-p
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
 export type EnrollStatus = 'not-started' | 'in-progress' | 'completed'
 export type LearningStatus = 'not-started' | 'in-progress' | 'completed'
-
+export type ContentType = 'pdf' | 'video' | 'quiz' | 'image' |'link'
 export interface IContentItem {
   id: string
   title: string
-  type: 'pdf' | 'video' | 'quiz'
+  type: ContentType
   content: string
 }
 
