@@ -1,19 +1,64 @@
-//TODO : Implement the course detail view for students. Currently,
-// the 'student-course-detail' screen is routed to StudentMyLearning, 
-// but it should display detailed information about a specific course, 
-// including its content, progress, and any relevant actions (like starting or continuing the course).
-
 import { useEffect, useState } from 'react'
 import {useApp} from '../../context'
 import type { ICourse, IContentItem } from '../../types'
 import {updateLearningProgress,fetchCompletedItemIds,updateLearningStatus} from '../../services/courseService'
 
+  interface ContentPreviewProps {
+    item: IContentItem;
+    onClose: () => void;
+  }
+
+export const ContentPreviewModal: React.FC<ContentPreviewProps> = ({ item, onClose }) => {
+  // The streaming URL pointing directly to your backend endpoint
+  const fileUrl = `http://localhost:3000/api/content/${item.content}`;
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h3>{item.title}</h3>
+          <button onClick={onClose}>Close</button>
+        </div>
+
+        <div className="preview-body">
+          {/* Render different preview elements based on the content type */}
+          {item.type === 'image' && (
+            <img src={fileUrl} alt={item.title} style={{ maxWidth: '100%', maxHeight: '70vh' }} />
+          )}
+
+          {item.type === 'video' && (
+            <video controls width="100%" style={{ maxHeight: '70vh' }}>
+              <source src={fileUrl} />
+              Your browser does not support the video tag.
+            </video>
+          )}
+
+          {item.type === 'pdf' && (
+            <iframe src={fileUrl} title={item.title} width="100%" height="500px" />
+          )}
+
+          {item.type === 'link' && (
+            <a href={item.content} target="_blank" rel="noopener noreferrer">
+              Open External Link: {item.content}
+            </a>
+          )}
+        </div>
+
+        <div className="modal-footer">
+          {/* Optional download button if they want to save it locally */}
+          <a href={fileUrl} download={item.title} className="download-btn">
+            Download File
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 export default function StudentCourseDetail({
-  course
+  selectedcourse
 }: {
-  course: ICourse
+  selectedcourse: ICourse
 }) {
   const {currentUser}= useApp();
   if(!currentUser) return;
@@ -31,10 +76,11 @@ export default function StudentCourseDetail({
     )
   }
 
+
   useEffect(() => {
       const loadProgress = async () => {
         try {
-          const data = await fetchCompletedItemIds(course.code, currentUser.id);
+          const data = await fetchCompletedItemIds(selectedcourse.code, currentUser.id);
           if (data && data.completedItems) {
             setCompletedIds(data.completedItems);
           }
@@ -44,7 +90,7 @@ export default function StudentCourseDetail({
       };    
 
       loadProgress();
-  }, [course.code,currentUser.id]);
+  }, [selectedcourse.code,currentUser.id,selectedcourse.units]);
   
 
 
@@ -57,24 +103,24 @@ export default function StudentCourseDetail({
           className="text-3xl font-bold text-white"
           style={{ fontFamily: 'Outfit, sans-serif' }}
         >
-          {course.title}
+          {selectedcourse.title}
         </h1>
 
         <p className="mt-2 text-sm text-slate-400">
-          Course Code: {course.code} | Faculty: {course.faculty}
+          Course Code: {selectedcourse.code} | Faculty: {selectedcourse.faculty}
         </p>
 
         <p className="mt-4 leading-relaxed text-slate-300">
-          {course.description}
+          {selectedcourse.description}
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2">
           <span className="rounded-full bg-indigo-500/20 px-3 py-1 text-sm text-indigo-300">
-            {course.category}
+            {selectedcourse.category}
           </span>
 
           <span className="rounded-full bg-slate-700 px-3 py-1 text-sm text-slate-300">
-            {course.level}
+            {selectedcourse.level}
           </span>
         </div>
       </div>
@@ -86,11 +132,11 @@ export default function StudentCourseDetail({
             Course Units
           </h2>
           <p className="mt-1 text-sm text-slate-400">
-            {course.units.length} units · Select a unit to view its materials
+            {selectedcourse.units.length} units · Select a unit to view its materials
           </p>
         </div>
 
-        {course.units.map((unit, index) => {
+        {selectedcourse.units.map((unit, index) => {
           const isExpanded = expandedUnits.includes(unit.id)
 
           return (
@@ -143,14 +189,16 @@ export default function StudentCourseDetail({
                           <div className="flex items-center justify-between gap-3">
                             <button
                               type="button"
-                              onClick={() => setSelectedItem(item)}
+                              onClick={() => {
+                                setSelectedItem(item); 
+                              }}
                               className="text-left flex-1 focus:outline-none"
                             >
                               <h4 className="font-medium text-white hover:text-indigo-400 transition">
                                 {item.title}
                               </h4>
                             </button>
-                        
+
                             <div className="flex items-center gap-2">
                               <span className="shrink-0 rounded bg-slate-700 px-2 py-1 text-xs uppercase text-slate-300">
                                 {item.type}
@@ -169,7 +217,9 @@ export default function StudentCourseDetail({
                           <div className="mt-3 flex items-center justify-between border-t border-slate-700/50 pt-3">
                             <button
                               type="button"
-                              onClick={() => setSelectedItem(item)}
+                              onClick={() => {
+                                setSelectedItem(item); 
+                              }}
                               className="text-xs text-indigo-400 hover:underline"
                             >
                               {isSelected ? 'Currently Viewing' : 'View Content'}
@@ -182,16 +232,16 @@ export default function StudentCourseDetail({
                                   const updatedCompletedIds = [...completedIds, String(item.id)];
                                   setCompletedIds(updatedCompletedIds);
                                   
-                                  const totalContentCount = course.units.reduce((acc, unit) => acc + unit.content.length, 0);
+                                  const totalContentCount = selectedcourse.units.reduce((acc, unit) => acc + unit.content.length, 0);
                                   const newPercentage = totalContentCount > 0 
                                   ? Math.round((updatedCompletedIds.length / totalContentCount) * 100) 
                                   : 0;
 
-                                  console.log(newPercentage);
+
                                   if(newPercentage === 100){
-                                    updateLearningStatus(course.code,currentUser.id,'completed');
+                                    updateLearningStatus(selectedcourse.code,currentUser.id,'completed');
                                   }
-                                  updateLearningProgress(course.code,currentUser.id,newPercentage,item.id);
+                                  updateLearningProgress(selectedcourse.code,currentUser.id,newPercentage,item.id);
                                 }}
                                 className="rounded bg-slate-700 px-3 py-1 text-xs font-medium text-slate-200 hover:bg-emerald-600 hover:text-white transition"
                               >
@@ -238,7 +288,10 @@ export default function StudentCourseDetail({
           </div>
 
           <div className="mt-5 whitespace-pre-wrap leading-7 text-slate-300">
-            {selectedItem.content}
+              <ContentPreviewModal 
+                  item={selectedItem} 
+                  onClose={() => setSelectedItem(null)} 
+               />
           </div>
         </section>
       )}

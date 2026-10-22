@@ -1,17 +1,87 @@
 import express from 'express';
 import cors from 'cors';
-import { connectDB } from './DBConnection.ts';
 import { CourseSchema,StudentSchema,FacultySchema, UserSchema} from './courseModel.ts';
 import type { ICourse, IStudent, IFaculty, ILogin,IUnit,IEnrolledCourse} from './types.ts';
 import bcrypt from 'bcrypt';
-import { resourceUsage } from 'process';
+
+import mongoose from 'mongoose';
+import { GridFSBucket } from 'mongodb';
+import dotenv from 'dotenv';
+import multer from 'multer';
+import { GridFsStorage } from 'multer-gridfs-storage';
+
+
+
+dotenv.config({ path: '../DB.env' });
+const MONGODB_URI = process.env.MONGODB_URI;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors()); 
 
+if (!MONGODB_URI) {
+  throw new Error('Please define the MONGODB_URI environment variable inside .env');
+}
+
+const storage = new GridFsStorage({
+  url: MONGODB_URI,
+  file: (_req: any, file: any) => {
+    return new Promise((resolve) => {
+      const match = ['video/mp4','video/webm','video/quicktime','image/png', 'image/jpeg', 'application/pdf'];
+      if (!match.includes(file.mimetype)) {
+        throw new Error('Invalid file type uploaded!');
+      }
+      const fileInfo = {
+        filename: `${Date.now()}-${file.originalname}`,
+        bucketName: 'fs',
+        metadata:{
+          contentType: file.mimetype
+        }
+      };
+      resolve(fileInfo);
+    });
+  }
+});
+
+const upload = multer({ storage });
+
+let gfsBucket: GridFSBucket;
+
+export const initGridFS = () => {
+  const db = mongoose.connection.db;
+  if (!db) {
+    throw new Error('Database connection not established yet.');
+  }
+  gfsBucket = new GridFSBucket(db, {
+    bucketName: 'fs'
+  });
+  console.log('GridFSBucket initialized successfully.');
+};
+
+export const getGridFSBucket = (): GridFSBucket => {
+  if (!gfsBucket) {
+    throw new Error('GridFSBucket has not been initialized. Call connectGridFS first.');
+  }
+  return gfsBucket;
+};
+
+
+export const connectDB = async (): Promise<void> => {
+  try {
+    const conn = await mongoose.connect(MONGODB_URI);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    
+    initGridFS()
+  } catch (error) {
+    console.error(`Error connecting to MongoDB: ${(error as Error).message}`);
+    process.exit(1);
+  }
+};
+
+
 connectDB();
+
 
 // Use for seeding the database with initial course data.
 export const seedCoursesDatabase = async (course: Partial<ICourse> = {}) => {
@@ -441,7 +511,6 @@ app.post('/api/FetchStudent/:studentEmailId', async (req, res) => {
 });
 
 app.post('/api/FetchFaculty/:facultyEmailId', async (req, res) => {
-   console.log('FetchFaculty route reached!');
   const { facultyEmailId  } = req.params;
   const password = req.body.password as string; 
   try {
@@ -480,6 +549,99 @@ app.post('/api/FetchFaculty/:facultyEmailId', async (req, res) => {
   }
 });
 
+app.patch('/api/AddContentToUnit/:CourseId',upload.single('file'), async (req,res)=>{
+try{
+  const {CourseId} = req.params;
+  const { unitId, contentType } = req.body;
+  if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+  const gridFsFileId = (req.file as any).id;
+
+  const newContentItem = {
+      id: new mongoose.Types.ObjectId().toString(),
+      title:  req.file.originalname,
+      type: contentType || 'pdf',
+      content: gridFsFileId.toString() 
+    };
+
+    const fetchedCourse = await CourseSchema.updateOne(
+       {"id" : CourseId},
+       { $push: { "units.$[targetUnit].content": newContentItem }},
+      { arrayFilters: [{ "targetUnit.id": unitId }]}
+    );
+    
+  
+    if (!fetchedCourse) {
+      return res.status(404).json({ error: 'Course or Unit not found' });
+    }
+
+    res.status(200).json({ 
+      success: true, 
+      contentItem: newContentItem 
+    });
+
+  } catch (error) {
+    console.error('Error Adding content to unit:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+
+});
+
+app.get('/api/content/:fileId',async(req,res)=>{
+
+try {
+    const { fileId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(fileId)) {
+      return res.status(400).json({ error: 'Invalid file ID format.' });
+    }
+
+    const objectId = new mongoose.Types.ObjectId(fileId);
+    const bucket = getGridFSBucket();
+
+    const files = await bucket.find({ _id: objectId }).toArray();
+    if (!files || files.length === 0) {
+      return res.status(404).json({ error: 'File not found.' });
+    }
+
+
+    const fileMetadata = files[0];
+    const mimeType =(fileMetadata.metadata?.contentType) || 'application/octet-stream';    
+    res.set('Content-Type', mimeType);
+    res.set('Content-Disposition', `inline; filename="${fileMetadata.filename}"`);
+      
+    const downloadStream = bucket.openDownloadStream(objectId);
+
+    downloadStream.on('error', (streamErr) => {
+      console.error('GridFS streaming error:', streamErr);
+      if (!res.headersSent) {
+        res.status(404).json({ error: 'Could not retrieve file stream.' });
+      }
+    });
+
+    downloadStream.on('data', (chunk) => {
+    console.log('Received chunk:', chunk.length, 'bytes');
+    });
+    
+    downloadStream.on('end', () => {
+      console.log('GridFS stream finished');
+    });
+    
+    downloadStream.on('error', (err) => {
+      console.error('GridFS stream error:', err);
+    });
+
+    downloadStream.pipe(res);
+
+  } catch (error: any) {
+    console.error('Error streaming file:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
 
 app.patch('/api/courses/:id/approval', async (req, res) => {
   try {

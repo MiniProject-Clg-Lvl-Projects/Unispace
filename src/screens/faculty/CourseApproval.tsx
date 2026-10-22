@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useApp } from '../../context'
 import { StatusBadge, Btn, Badge } from '../../components/ui'
 import type { ICourse } from '../../types'
@@ -9,56 +9,55 @@ export default function CourseApproval() {
 
   const filtered = courses.filter(c => filter === 'all' || c.approvalStatus === filter)
 
-  const updateApproval = async (
-  course: ICourse,
-  approvalStatus: 'approved' | 'rejected'
-  ) => {
-
-  try {
-    const response = await fetch(
-      `http://localhost:3000/api/courses/${encodeURIComponent(course.id)}/approval`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ approvalStatus })
+    const updateApproval = async (
+    course: ICourse,
+    approvalStatus: 'approved' | 'rejected'
+    ) => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/courses/${encodeURIComponent(course.id)}/approval`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ approvalStatus })
+          }
+        );
+        const data = await response.json();
+          if (!response.ok) {
+          throw new Error(data.message || 'Update failed');
+        }
+        setCourses(prev =>
+          prev.map(c =>
+            c.id === course.id
+              ? { ...c, ...data.course }
+              : c
+          )
+        );
+      
+        showToast(
+          approvalStatus === 'approved'
+            ? `"${course.title}" approved successfully.`
+            : `"${course.title}" rejected.`
+        );
+      } catch (error) {
+        console.error('Approval update failed:', error);
+        showToast('Could not update approval. Please try again.', 'error');
       }
-    );
-    const data = await response.json();
-      if (!response.ok) {
-      throw new Error(data.message || 'Update failed');
-    }
-    setCourses(prev =>
-      prev.map(c =>
-        c.id === course.id
-          ? { ...c, ...data.course }
-          : c
-      )
-    );
 
-    showToast(
-      approvalStatus === 'approved'
-        ? `"${course.title}" approved successfully.`
-        : `"${course.title}" rejected.`
-    );
-  } catch (error) {
-    console.error('Approval update failed:', error);
-    showToast('Could not update approval. Please try again.', 'error');
-  }
-  };
+    }
 
   const approve = (course: ICourse) =>{
     updateApproval(course, 'approved');
   }
-};
-
-const approve = (course: ICourse) =>
-  updateApproval(course, 'approved');
-
   const reject = (course: ICourse) =>
     updateApproval(course, 'rejected');
 
+  useEffect(() => {
+    setCourses(courses);
+  }, [courses]);
+  
   const tabs = [
     { key: 'all' as const, label: 'All Courses', count: courses.length },
     { key: 'pending' as const, label: 'Pending', count: courses.filter(c => c.approvalStatus === 'pending').length },

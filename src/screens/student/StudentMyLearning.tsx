@@ -2,10 +2,10 @@ import { useApp } from '../../context'
 import { useState,useEffect } from 'react'
 import { Btn, StatCard, ProgressBar, EmptyState, StatusBadge } from '../../components/ui'
 import type { Screen } from '../../types'
-import {updateLearningStatus} from '../../services/courseService'
+import {getCourse, updateLearningStatus} from '../../services/courseService'
 import { ICourse, IEnrolledCourse, IStudent } from '@/types'
 import {getStudentDetail} from '../../services/LoginServices'
-
+import { getStudentEnrolledCourses } from '../../services/courseService'
 
 
 
@@ -56,6 +56,7 @@ export default function StudentMyLearning() {
   ]
 
   const isSubScreen = filter !== 'all'
+
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
