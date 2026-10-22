@@ -130,6 +130,43 @@ export const seedFacultyDatabase = async (faculty: Partial<IFaculty> = {}) => {
 
 
 app.use(express.json());
+app.patch('/api/courses/:id/approval', async (req, res) => {
+  try {
+    const { approvalStatus } = req.body;
+
+    if (!['approved', 'rejected', 'pending'].includes(approvalStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid approval status'
+      });
+    }
+
+    const course = await CourseSchema.findOneAndUpdate(
+      { id: req.params.id },
+      {
+        $set: {
+          approvalStatus,
+          status: approvalStatus
+        }
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    res.json({ success: true, course });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update course approval'
+    });
+  }
+});
 
 app.get('/', (req, res) => {
   res.send('API is running smoothly!');
